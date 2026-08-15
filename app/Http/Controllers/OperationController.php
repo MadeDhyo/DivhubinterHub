@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Operation;
+use App\Services\ReadinessService;
 
 class OperationController extends Controller
 {
-    public function show($id)
+    public function show($id, ReadinessService $readinessService)
     {
         $operation = Operation::with([
             'targets',
@@ -16,8 +17,11 @@ class OperationController extends Controller
             'checklists.items.templateItem'
         ])->findOrFail($id);
 
+        $readiness = $readinessService->calculate($operation);
+
         return Inertia::render('OperationDetail', [
-            'operation' => $operation
+            'operation' => $operation,
+            'readiness' => $readiness,
         ]);
     }
 }
