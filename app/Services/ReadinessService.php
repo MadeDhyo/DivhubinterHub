@@ -58,14 +58,12 @@ class ReadinessService
         // 3. Penanganan Kondisi Khusus: Jika tidak ada item mandatory
         if ($totalMandatory === 0) {
             return [
-                'score' => 100,
+                'score' => 0,
                 'total_mandatory' => 0,
                 'completed_mandatory' => 0,
-                'status' => $hasUncompletedCritical ? 'NOT_READY' : 'READY',
+                'status' => 'PENDING_CONFIGURATION',
                 'has_mandatory_items' => false,
-                'message' => $hasUncompletedCritical 
-                    ? 'Operasi tidak memiliki item wajib, tetapi terhambat oleh blocker kritis non-mandatory.'
-                    : 'Operasi ini tidak memiliki item checklist wajib (mandatory). Secara administratif dianggap siap.',
+                'message' => 'Operation belum memiliki mandatory checklist yang dikonfigurasi.',
                 'overdue_items' => $this->formatItems($overdueItems),
                 'has_overdue' => $overdueItems->isNotEmpty(),
                 'uncompleted_critical_blockers' => $this->formatItems($uncompletedCriticalBlockers),
@@ -81,7 +79,10 @@ class ReadinessService
             $status = 'READY';
             $message = 'Semua persyaratan wajib telah dipenuhi.';
         } else {
-            if ($completedMandatory > 0) {
+            if ($completedMandatory === $totalMandatory && $hasUncompletedCritical) {
+                $status = 'NOT_READY';
+                $message = 'Seluruh persyaratan wajib telah dipenuhi, tetapi masih terdapat blocker kritis yang belum diselesaikan.';
+            } elseif ($completedMandatory > 0) {
                 $status = 'PARTIALLY_READY';
                 $message = $hasUncompletedCritical 
                     ? "Persyaratan wajib terpenuhi sebagian dan terhambat oleh blocker kritis."
@@ -109,7 +110,7 @@ class ReadinessService
     }
 
     /**
-     * Tentukan apakah item checklist adalah critical blocker (Abstraksi Bisnis).
+     * Tentukan apakah item checklist adalah critical blocker.
      *
      * @param OperationChecklistItem $item
      * @return bool
@@ -120,17 +121,7 @@ class ReadinessService
             return false;
         }
 
-        // Karena tidak ada kolom khusus, kita gunakan pendeteksian nama/kata kunci secara dinamis.
-        $criticalKeywords = ['red notice', 'identifikasi', 'critical', 'blocker'];
-        $nameLower = strtolower($item->templateItem->name);
-
-        foreach ($criticalKeywords as $keyword) {
-            if (str_contains($nameLower, $keyword)) {
-                return true;
-            }
-        }
-
-        return false;
+        return (bool) $item->templateItem->is_critical;
     }
 
     /**

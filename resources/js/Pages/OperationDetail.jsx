@@ -159,9 +159,10 @@ export default function OperationDetail({ auth, operation, readiness }) {
                                         <span className="text-sm text-gray-500 font-medium">Readiness Status</span>
                                         <span className={`inline-flex items-center px-3 py-1 mt-3 rounded-full text-sm font-bold ${
                                             readiness.status === 'READY' ? 'bg-green-100 text-green-800' :
-                                            readiness.status === 'PARTIALLY_READY' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+                                            readiness.status === 'PARTIALLY_READY' ? 'bg-yellow-100 text-yellow-800' :
+                                            readiness.status === 'PENDING_CONFIGURATION' ? 'bg-purple-100 text-purple-800' : 'bg-red-100 text-red-800'
                                         }`}>
-                                            {readiness.status}
+                                            {readiness.status.replace('_', ' ')}
                                         </span>
                                     </div>
 

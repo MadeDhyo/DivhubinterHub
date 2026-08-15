@@ -24,9 +24,9 @@ class DummyDataSeeder extends Seeder
         ]);
 
         $items = [
-            \App\Models\ChecklistTemplateItem::create(['checklist_template_id' => $template->id, 'name' => 'Identifikasi Profil', 'is_mandatory' => true]),
-            \App\Models\ChecklistTemplateItem::create(['checklist_template_id' => $template->id, 'name' => 'Cek Status Red Notice', 'is_mandatory' => true]),
-            \App\Models\ChecklistTemplateItem::create(['checklist_template_id' => $template->id, 'name' => 'Koordinasi Negara Asal', 'is_mandatory' => false])
+            \App\Models\ChecklistTemplateItem::create(['checklist_template_id' => $template->id, 'name' => 'Identifikasi Profil', 'is_mandatory' => true, 'is_critical' => true]),
+            \App\Models\ChecklistTemplateItem::create(['checklist_template_id' => $template->id, 'name' => 'Cek Status Red Notice', 'is_mandatory' => true, 'is_critical' => true]),
+            \App\Models\ChecklistTemplateItem::create(['checklist_template_id' => $template->id, 'name' => 'Koordinasi Negara Asal', 'is_mandatory' => false, 'is_critical' => false])
         ];
 
         $operation = \App\Models\Operation::create([

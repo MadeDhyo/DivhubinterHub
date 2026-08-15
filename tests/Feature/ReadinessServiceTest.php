@@ -69,6 +69,7 @@ class ReadinessServiceTest extends TestCase
                 'checklist_template_id' => $template->id,
                 'name' => "Mandatory Item $i",
                 'is_mandatory' => true,
+                'is_critical' => false,
             ]);
 
             OperationChecklistItem::create([
@@ -100,6 +101,7 @@ class ReadinessServiceTest extends TestCase
                 'checklist_template_id' => $template->id,
                 'name' => "Mandatory Item $i",
                 'is_mandatory' => true,
+                'is_critical' => false,
             ]);
 
             OperationChecklistItem::create([
@@ -131,6 +133,7 @@ class ReadinessServiceTest extends TestCase
                 'checklist_template_id' => $template->id,
                 'name' => "Mandatory Item $i",
                 'is_mandatory' => true,
+                'is_critical' => false,
             ]);
 
             OperationChecklistItem::create([
@@ -150,21 +153,20 @@ class ReadinessServiceTest extends TestCase
     }
 
     /**
-     * Test 4 — Tidak ada mandatory item
+     * Test 4 — Tidak ada mandatory item (PENDING_CONFIGURATION)
      */
     public function test_no_mandatory_items()
     {
         [$operation, $template, $opChecklist] = $this->createBaseOperation();
 
         // Tanpa ada checklist wajib (kosong)
-        // Penanganan sementara: score = 100 dan status = READY
-        // Catatan: Asumsi kelayakan bisnis ini masih perlu divalidasi dengan tim analis/pimpinan.
+        // Keputusan final: score = 0 dan status = PENDING_CONFIGURATION
         $result = $this->service->calculate($operation);
 
-        $this->assertEquals(100, $result['score']);
+        $this->assertEquals(0, $result['score']);
         $this->assertEquals(0, $result['total_mandatory']);
         $this->assertEquals(0, $result['completed_mandatory']);
-        $this->assertEquals('READY', $result['status']);
+        $this->assertEquals('PENDING_CONFIGURATION', $result['status']);
         $this->assertFalse($result['has_mandatory_items']);
     }
 
@@ -181,6 +183,7 @@ class ReadinessServiceTest extends TestCase
                 'checklist_template_id' => $template->id,
                 'name' => "Mandatory Item $i",
                 'is_mandatory' => true,
+                'is_critical' => false,
             ]);
 
             OperationChecklistItem::create([
@@ -196,6 +199,7 @@ class ReadinessServiceTest extends TestCase
                 'checklist_template_id' => $template->id,
                 'name' => "Non-Mandatory Item $j",
                 'is_mandatory' => false,
+                'is_critical' => false,
             ]);
 
             OperationChecklistItem::create([
@@ -228,6 +232,7 @@ class ReadinessServiceTest extends TestCase
                 'checklist_template_id' => $template->id,
                 'name' => "Mandatory Item " . ($index + 1),
                 'is_mandatory' => true,
+                'is_critical' => false,
             ]);
 
             OperationChecklistItem::create([
@@ -257,6 +262,7 @@ class ReadinessServiceTest extends TestCase
             'checklist_template_id' => $template->id,
             'name' => "Overdue Mandatory Item",
             'is_mandatory' => true,
+            'is_critical' => false,
         ]);
 
         OperationChecklistItem::create([
@@ -274,17 +280,18 @@ class ReadinessServiceTest extends TestCase
     }
 
     /**
-     * Test 8 — Critical/blocking requirement yang belum selesai mencegah READY
+     * Test 8 — is_critical = true dan belum Completed -> menjadi blocker
      */
     public function test_critical_blocker_prevents_ready_status()
     {
         [$operation, $template, $opChecklist] = $this->createBaseOperation();
 
-        // Buat item wajib yang mendefinisikan keyword critical ('Cek Status Red Notice')
+        // Buat item wajib yang memiliki is_critical = true
         $templateItem = ChecklistTemplateItem::create([
             'checklist_template_id' => $template->id,
-            'name' => "Cek Status Red Notice",
+            'name' => "Check Red Notice Reference",
             'is_mandatory' => true,
+            'is_critical' => true,
         ]);
 
         OperationChecklistItem::create([
@@ -299,6 +306,107 @@ class ReadinessServiceTest extends TestCase
         $this->assertNotEquals('READY', $result['status']);
         $this->assertTrue($result['has_uncompleted_critical_blockers']);
         $this->assertCount(1, $result['uncompleted_critical_blockers']);
-        $this->assertEquals('Cek Status Red Notice', $result['uncompleted_critical_blockers'][0]['name']);
+        $this->assertEquals('Check Red Notice Reference', $result['uncompleted_critical_blockers'][0]['name']);
+    }
+
+    /**
+     * Test 9 — is_critical = false -> bukan blocker
+     */
+    public function test_non_critical_mandatory_item_is_not_blocker()
+    {
+        [$operation, $template, $opChecklist] = $this->createBaseOperation();
+
+        // Buat item wajib yang memiliki is_critical = false
+        $templateItem = ChecklistTemplateItem::create([
+            'checklist_template_id' => $template->id,
+            'name' => "Normal Task",
+            'is_mandatory' => true,
+            'is_critical' => false,
+        ]);
+
+        OperationChecklistItem::create([
+            'operation_checklist_id' => $opChecklist->id,
+            'checklist_template_item_id' => $templateItem->id,
+            'status' => 'Completed',
+        ]);
+
+        $result = $this->service->calculate($operation);
+
+        // Harus READY karena satu-satunya item wajib sudah Completed
+        $this->assertEquals('READY', $result['status']);
+        $this->assertFalse($result['has_uncompleted_critical_blockers']);
+        $this->assertCount(0, $result['uncompleted_critical_blockers']);
+    }
+
+    /**
+     * Test 10 — Kata kunci diabaikan jika is_critical = false
+     */
+    public function test_keywords_ignored_if_is_critical_false()
+    {
+        [$operation, $template, $opChecklist] = $this->createBaseOperation();
+
+        // Mengandung keyword "critical" dan "red notice" tapi is_critical = false
+        $templateItem = ChecklistTemplateItem::create([
+            'checklist_template_id' => $template->id,
+            'name' => "Identifikasi Critical Blocker Red Notice",
+            'is_mandatory' => true,
+            'is_critical' => false,
+        ]);
+
+        OperationChecklistItem::create([
+            'operation_checklist_id' => $opChecklist->id,
+            'checklist_template_item_id' => $templateItem->id,
+            'status' => 'In Progress',
+        ]);
+
+        $result = $this->service->calculate($operation);
+
+        // Tidak boleh dianggap sebagai critical blocker meskipun belum selesai
+        $this->assertFalse($result['has_uncompleted_critical_blockers']);
+        $this->assertCount(0, $result['uncompleted_critical_blockers']);
+    }
+
+    /**
+     * Test 11 — Semua mandatory completed, tetapi ada critical blocker non-mandatory belum Completed -> NOT_READY dengan score 100
+     */
+    public function test_all_mandatory_completed_but_critical_blocker_makes_not_ready()
+    {
+        [$operation, $template, $opChecklist] = $this->createBaseOperation();
+
+        // 1. Buat item wajib yang Completed
+        $mandatoryItem = ChecklistTemplateItem::create([
+            'checklist_template_id' => $template->id,
+            'name' => "Mandatory Completed Item",
+            'is_mandatory' => true,
+            'is_critical' => false,
+        ]);
+
+        OperationChecklistItem::create([
+            'operation_checklist_id' => $opChecklist->id,
+            'checklist_template_item_id' => $mandatoryItem->id,
+            'status' => 'Completed',
+        ]);
+
+        // 2. Buat item non-wajib tapi critical (is_critical = true) yang belum Completed
+        $criticalItem = ChecklistTemplateItem::create([
+            'checklist_template_id' => $template->id,
+            'name' => "Non-Mandatory Critical Blocker Item",
+            'is_mandatory' => false,
+            'is_critical' => true,
+        ]);
+
+        OperationChecklistItem::create([
+            'operation_checklist_id' => $opChecklist->id,
+            'checklist_template_item_id' => $criticalItem->id,
+            'status' => 'Not Started',
+        ]);
+
+        $result = $this->service->calculate($operation);
+
+        $this->assertEquals(100, $result['score']);
+        $this->assertEquals('NOT_READY', $result['status']);
+        $this->assertTrue($result['has_uncompleted_critical_blockers']);
+        $this->assertCount(1, $result['uncompleted_critical_blockers']);
+        $this->assertEquals('Non-Mandatory Critical Blocker Item', $result['uncompleted_critical_blockers'][0]['name']);
     }
 }
