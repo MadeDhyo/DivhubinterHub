@@ -221,11 +221,23 @@ export default function OperationDetail({ auth, operation, readiness }) {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                                 </svg>
                             </Link>
-                            <div>
-                                <h2 className="text-xl font-extrabold text-white leading-tight">
-                                    Detail Operasi: <span className="text-[#d4af37] font-mono">{operation.operation_number}</span>
-                                </h2>
-                                <p className="text-xs text-gray-400 mt-0.5">NCB Interpol Command Center</p>
+                            <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div>
+                                    <h2 className="text-xl font-extrabold text-white leading-tight">
+                                        Detail Operasi: <span className="text-[#d4af37] font-mono">{operation.operation_number}</span>
+                                    </h2>
+                                    <p className="text-xs text-gray-400 mt-0.5">NCB Interpol Command Center</p>
+                                </div>
+                                {(auth.user.role === 'admin' || auth.user.role === 'pimpinan') && (
+                                    <div className="flex gap-3">
+                                        <button className="px-4 py-2 bg-[#d4af37]/10 text-[#d4af37] border border-[#d4af37]/50 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#d4af37]/20 transition shadow-sm" onClick={() => alert('Fitur Ubah Status sedang dikembangkan')}>
+                                            Ubah Status
+                                        </button>
+                                        <button className="px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/50 rounded text-xs font-bold uppercase tracking-wider hover:bg-emerald-500/20 transition shadow-sm" onClick={() => alert('Fitur Approve Readiness sedang dikembangkan')}>
+                                            Approve
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -382,23 +394,35 @@ export default function OperationDetail({ auth, operation, readiness }) {
                                                                     {item.template_item?.is_critical && <span className="px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-red-500/10 text-red-400 border border-red-500/20 uppercase">CRITICAL</span>}
                                                                 </span>
                                                             </div>
-                                                            <div className="flex items-center gap-3 self-end sm:self-auto">
-                                                                <select
-                                                                    className="text-xs bg-[#031433] border-white/10 text-white rounded-md shadow-sm focus:border-[#d4af37] focus:ring-[#d4af37]"
-                                                                    value={item.status}
-                                                                    onChange={(e) => handleStatusChange(item.id, e.target.value)}
-                                                                >
-                                                                    <option value="Not Started">Not Started</option>
-                                                                    <option value="In Progress">In Progress</option>
-                                                                    <option value="Completed">Completed</option>
-                                                                </select>
-                                                                <span className={`px-2.5 py-0.5 text-[10px] rounded-full font-bold uppercase tracking-wider ${
-                                                                    item.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                                                                    item.status === 'In Progress' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' : 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
-                                                                }`}>
-                                                                    {item.status}
-                                                                </span>
-                                                            </div>
+                                                                <div className="flex items-center gap-3 self-end sm:self-auto">
+                                                                    <select
+                                                                        className="text-xs bg-[#031433] border-white/10 text-white rounded-md shadow-sm focus:border-[#d4af37] focus:ring-[#d4af37]"
+                                                                        value={item.status}
+                                                                        onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                                                                        disabled={
+                                                                            (auth.user.role === 'staf' && (item.status === 'Verified' || item.status === 'Rejected'))
+                                                                        }
+                                                                    >
+                                                                        <option value="Not Started" disabled={auth.user.role !== 'staf'}>Not Started</option>
+                                                                        <option value="In Progress" disabled={auth.user.role !== 'staf'}>In Progress</option>
+                                                                        <option value="Completed" disabled={auth.user.role !== 'staf'}>Completed</option>
+                                                                        {(auth.user.role === 'admin' || auth.user.role === 'pimpinan' || item.status === 'Verified' || item.status === 'Rejected') && (
+                                                                            <>
+                                                                                <option value="Verified" disabled={auth.user.role === 'staf'}>Verified</option>
+                                                                                <option value="Rejected" disabled={auth.user.role === 'staf'}>Rejected</option>
+                                                                            </>
+                                                                        )}
+                                                                    </select>
+                                                                    <span className={`px-2.5 py-0.5 text-[10px] rounded-full font-bold uppercase tracking-wider ${
+                                                                        item.status === 'Verified' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                                                                        item.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                                                        item.status === 'In Progress' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' :
+                                                                        item.status === 'Rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                                                        'bg-gray-500/10 text-gray-400 border border-gray-500/20'
+                                                                    }`}>
+                                                                        {item.status}
+                                                                    </span>
+                                                                </div>
                                                         </li>
                                                     ))}
                                                 </ul>

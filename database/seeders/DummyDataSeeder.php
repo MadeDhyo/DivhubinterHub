@@ -12,10 +12,25 @@ class DummyDataSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = \App\Models\User::factory()->create([
-            'name' => 'Pimpinan',
+        $admin = \App\Models\User::factory()->create([
+            'name' => 'Super Admin',
             'email' => 'admin@ocms.local',
             'password' => bcrypt('password'),
+            'role' => 'admin',
+        ]);
+
+        $pimpinan = \App\Models\User::factory()->create([
+            'name' => 'Kasubbag Pimpinan',
+            'email' => 'pimpinan@ocms.local',
+            'password' => bcrypt('password'),
+            'role' => 'pimpinan',
+        ]);
+
+        $staf = \App\Models\User::factory()->create([
+            'name' => 'Staff Anggota',
+            'email' => 'staf@ocms.local',
+            'password' => bcrypt('password'),
+            'role' => 'staf',
         ]);
 
         $template = \App\Models\ChecklistTemplate::create([
@@ -34,7 +49,7 @@ class DummyDataSeeder extends Seeder
             'name' => 'Operation Alpha',
             'status' => 'Verification',
             'priority' => 'High',
-            'pic_id' => $user->id,
+            'pic_id' => $pimpinan->id,
         ]);
 
         \App\Models\Target::create([
@@ -55,6 +70,8 @@ class DummyDataSeeder extends Seeder
                 'operation_checklist_id' => $opChecklist->id,
                 'checklist_template_item_id' => $item->id,
                 'status' => 'Not Started',
+                'pic_id' => $staf->id,
+                'reviewer_id' => $pimpinan->id,
             ]);
         }
     }

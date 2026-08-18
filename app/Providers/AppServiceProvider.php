@@ -36,7 +36,15 @@ class AppServiceProvider extends ServiceProvider
     {
         // 1. View Operation
         Gate::define('view-operation', function (User $user, Operation $operation) {
-            return $this->isAdminOrPimpinan($user) || $user->id === $operation->pic_id;
+            if ($this->isAdminOrPimpinan($user) || $user->id === $operation->pic_id) {
+                return true;
+            }
+
+            return $operation->checklists()
+                ->whereHas('items', function ($query) use ($user) {
+                    $query->where('pic_id', $user->id)
+                          ->orWhere('reviewer_id', $user->id);
+                })->exists();
         });
 
         // 2. Update Checklist Item
@@ -59,10 +67,10 @@ class AppServiceProvider extends ServiceProvider
                 return true;
             }
 
-            // Izinkan jika user adalah reviewer dari salah satu item di operasi ini
             return $operation->checklists()
                 ->whereHas('items', function ($query) use ($user) {
-                    $query->where('reviewer_id', $user->id);
+                    $query->where('pic_id', $user->id)
+                          ->orWhere('reviewer_id', $user->id);
                 })->exists();
         });
 
@@ -75,6 +83,11 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('change-operation-status', function (User $user) {
             return $this->isAdminOrPimpinan($user);
         });
+
+        // 7. Admin Access (Hanya Admin)
+        Gate::define('admin-access', function (User $user) {
+            return $user->isAdmin();
+        });
     }
 
     /**
@@ -82,6 +95,6 @@ class AppServiceProvider extends ServiceProvider
      */
     private function isAdminOrPimpinan(User $user): bool
     {
-        return $user->email === 'admin@ocms.local' || str_contains(strtolower($user->name), 'pimpinan');
+        return $user->isAdmin() || $user->isPimpinan();
     }
 }

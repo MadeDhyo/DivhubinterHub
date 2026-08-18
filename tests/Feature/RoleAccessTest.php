@@ -36,30 +36,35 @@ class RoleAccessTest extends TestCase
             'name' => 'Pimpinan Hubinter',
             'email' => 'admin@ocms.local',
             'password' => bcrypt('password'),
+            'role' => 'admin',
         ]);
 
         $this->pic1 = User::create([
             'name' => 'PIC Satu',
             'email' => 'pic1@ocms.local',
             'password' => bcrypt('password'),
+            'role' => 'staf',
         ]);
 
         $this->pic2 = User::create([
             'name' => 'PIC Dua',
             'email' => 'pic2@ocms.local',
             'password' => bcrypt('password'),
+            'role' => 'staf',
         ]);
 
         $this->reviewer = User::create([
             'name' => 'Reviewer Satu',
             'email' => 'reviewer1@ocms.local',
             'password' => bcrypt('password'),
+            'role' => 'pimpinan',
         ]);
 
         $this->otherUser = User::create([
             'name' => 'User Biasa',
             'email' => 'other@ocms.local',
             'password' => bcrypt('password'),
+            'role' => 'staf',
         ]);
 
         // 2. Setup Operation and Checklists

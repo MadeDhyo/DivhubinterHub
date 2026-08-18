@@ -22,6 +22,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/operations/{id}', [OperationController::class, 'show'])->name('operations.show');
     Route::post('/checklists/{id}/status', [ChecklistController::class, 'updateStatus'])->name('checklists.updateStatus');
+
+    // Khusus Admin
+    Route::middleware('can:admin-access')->group(function () {
+        Route::get('/user-management', [\App\Http\Controllers\UserController::class, 'index'])->name('user-management.index');
+        Route::post('/user-management', [\App\Http\Controllers\UserController::class, 'store'])->name('user-management.store');
+        Route::delete('/user-management/{id}', [\App\Http\Controllers\UserController::class, 'destroy'])->name('user-management.destroy');
+
+        Route::get('/activity-logs', [\App\Http\Controllers\ActivityLogController::class, 'index'])->name('activity-logs.index');
+    });
 });
 
 Route::middleware('auth')->group(function () {
