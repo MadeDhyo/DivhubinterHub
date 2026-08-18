@@ -13,7 +13,7 @@ return [
     */
 
     'allowed_ip_subnets' => array_filter(
-        explode(',', env('ALLOWED_IP_SUBNETS', '127.0.0.1,::1,192.168.80.0/24'))
+        explode(',', env('ALLOWED_IP_SUBNETS', '192.168.80.0/24'))
     ),
 
 ];
