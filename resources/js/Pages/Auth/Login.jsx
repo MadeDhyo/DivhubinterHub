@@ -20,10 +20,9 @@ export default function Login({ status, canResetPassword }) {
     };
 
     return (
-        <div className="min-h-screen bg-[#001b3d] flex flex-col items-center justify-center p-4 font-sans text-white relative overflow-hidden">
-            {/* Visual background details - subtle glow */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(3,20,51,0.8)_0%,#001b3d_100%)] z-0" />
-            <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#d4af37]/5 rounded-full blur-[120px] pointer-events-none z-0" />
+        <div className="min-h-screen bg-[#001b3d] flex flex-col items-center justify-center p-4 font-sans text-white relative overflow-hidden bg-cover bg-center" style={{ backgroundImage: "url('/images/login_bg.jpg')" }}>
+            {/* Subtle dark overlay for dashboard integration */}
+            <div className="absolute inset-0 bg-[#001b3d]/45 z-0" />
 
             <Head title="Log in" />
 
