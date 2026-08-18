@@ -76,14 +76,14 @@ class DocumentAndSecurityTest extends TestCase
 
     public function test_lan_access_middleware_blocks_unauthorized_ip()
     {
-        config(['security.allowed_ip_subnets' => ['192.168.1.0/24', '127.0.0.1']]);
+        config(['security.allowed_ip_subnets' => ['192.168.80.0/24', '127.0.0.1']]);
 
         // Request from unauthorized IP
         $response = $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.195'])->get('/');
         $response->assertStatus(403);
 
         // Request from allowed LAN IP
-        $responseAllowed = $this->withServerVariables(['REMOTE_ADDR' => '192.168.1.61'])->get('/');
+        $responseAllowed = $this->withServerVariables(['REMOTE_ADDR' => '192.168.80.0'])->get('/');
         $responseAllowed->assertStatus(200);
     }
 }
