@@ -38,33 +38,53 @@ export default function Login({ status, canResetPassword }) {
             {/* Modal Pop-up Success Overlay */}
             {loginSuccess && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-success-backdrop" style={{ backgroundColor: 'rgba(0,10,30,0.82)' }}>
-                    <div className="animate-success-modal animate-success-glow relative bg-gradient-to-b from-[#04244d] to-[#021633] border border-emerald-500/30 rounded-3xl px-10 py-12 max-w-[260px] w-full text-center overflow-hidden">
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-px bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent" />
+                    {/* Card */}
+                    <div className="animate-success-modal animate-success-glow relative bg-gradient-to-b from-[#04244d] to-[#021633] border border-emerald-500/30 rounded-3xl p-10 max-w-xs w-full text-center overflow-hidden">
 
-                        {/* Icon */}
-                        <div className="relative flex items-center justify-center mx-auto mb-6" style={{ width: 72, height: 72 }}>
-                            <span className="animate-ripple absolute inset-0 rounded-full border border-emerald-400/35" />
-                            <span className="absolute inset-0 rounded-full border border-emerald-500/15" />
-                            <span className="animate-check-ring absolute inset-2 rounded-full bg-emerald-500/10 border border-emerald-400/35 flex items-center justify-center">
-                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
+                        {/* Ambient top-glow streak */}
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-px bg-gradient-to-r from-transparent via-emerald-400/70 to-transparent" />
+
+                        {/* Icon area */}
+                        <div className="relative flex items-center justify-center mx-auto mb-7" style={{ width: 80, height: 80 }}>
+                            {/* Ripple ring */}
+                            <span className="animate-ripple absolute inset-0 rounded-full border border-emerald-400/40" />
+                            {/* Static outer ring */}
+                            <span className="absolute inset-0 rounded-full border border-emerald-500/20" />
+                            {/* Inner circle */}
+                            <span className="animate-check-ring absolute inset-2 rounded-full bg-emerald-500/10 border border-emerald-400/40 flex items-center justify-center">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
                                     <path className="animate-check-draw" d="M5 13l4 4L19 7" />
                                 </svg>
                             </span>
                         </div>
 
-                        <p className="text-base font-bold text-white tracking-wide">Berhasil Masuk</p>
-                        <div className="mt-5 flex items-center justify-center gap-2">
-                            <span className="h-3.5 w-3.5 border-2 border-[#d4af37] border-t-transparent rounded-full animate-spin" />
-                            <span className="text-[10px] font-semibold tracking-widest text-gray-500 uppercase">Mengalihkan...</span>
+                        {/* Text */}
+                        <h3 className="text-xl font-extrabold text-white tracking-wide leading-tight">
+                            Autentikasi Berhasil
+                        </h3>
+                        <p className="text-xs text-emerald-300/80 mt-2 font-medium tracking-wide">
+                            Login sukses. Mengalihkan ke<br />
+                            <span className="text-[#d4af37] font-bold">Pusat Komando</span>...
+                        </p>
+
+                        {/* Separator */}
+                        <div className="my-5 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
+
+                        {/* Spinner row */}
+                        <div className="flex items-center justify-center gap-2.5">
+                            <span className="inline-block h-4 w-4 border-2 border-[#d4af37] border-t-transparent rounded-full animate-spin" />
+                            <span className="text-[11px] font-bold tracking-widest text-gray-400 uppercase">Menghubungkan</span>
                         </div>
+
+                        {/* Ambient bottom glow */}
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
                     </div>
                 </div>
             )}
 
-            <div className={`w-full max-w-[450px] bg-[#031433]/85 border border-white/10 shadow-2xl rounded-2xl p-8 backdrop-blur-md relative z-10 overflow-hidden border-t-4 border-t-[#d4af37] transition-all duration-300 ${
-                hasErrors ? 'animate-shake border-t-red-500 shadow-[0_0_25px_rgba(239,68,68,0.3)]' :
-                loginSuccess ? 'border-t-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.35)]' : 'animate-fade-in-up'
-            }`}>
+            <div className={`w-full max-w-[450px] bg-[#031433]/85 border border-white/10 shadow-2xl rounded-2xl p-8 backdrop-blur-md relative z-10 overflow-hidden border-t-4 border-t-[#d4af37] transition-all duration-300 ${hasErrors ? 'animate-shake border-t-red-500 shadow-[0_0_25px_rgba(239,68,68,0.3)]' :
+                    loginSuccess ? 'border-t-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.35)]' : 'animate-fade-in-up'
+                }`}>
 
                 {/* Logo Section */}
                 <div className="flex flex-col items-center mb-8">
@@ -196,11 +216,10 @@ export default function Login({ status, canResetPassword }) {
                     {/* Submit Button */}
                     <button
                         type="submit"
-                        className={`w-full font-bold py-3.5 px-4 rounded-lg text-xs uppercase tracking-widest transition-all duration-200 flex items-center justify-center gap-2 shadow-lg disabled:opacity-85 disabled:cursor-not-allowed ${
-                            loginSuccess
+                        className={`w-full font-bold py-3.5 px-4 rounded-lg text-xs uppercase tracking-widest transition-all duration-200 flex items-center justify-center gap-2 shadow-lg disabled:opacity-85 disabled:cursor-not-allowed ${loginSuccess
                                 ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.5)]'
                                 : 'bg-[#d4af37] hover:bg-[#b5952f] active:bg-[#9c7f23] text-[#001b3d] hover:shadow-[0_0_20px_rgba(212,175,55,0.35)]'
-                        }`}
+                            }`}
                         disabled={processing || loginSuccess}
                     >
                         {loginSuccess ? (
