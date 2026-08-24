@@ -16,6 +16,28 @@
         animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
+    .animate-float {
+        animation: float 4s ease-in-out infinite;
+    }
+
+    .animate-stagger-1 { animation: staggerFadeUp 0.45s cubic-bezier(0.16,1,0.3,1) 0.05s both; }
+    .animate-stagger-2 { animation: staggerFadeUp 0.45s cubic-bezier(0.16,1,0.3,1) 0.12s both; }
+    .animate-stagger-3 { animation: staggerFadeUp 0.45s cubic-bezier(0.16,1,0.3,1) 0.19s both; }
+    .animate-stagger-4 { animation: staggerFadeUp 0.45s cubic-bezier(0.16,1,0.3,1) 0.26s both; }
+
+    .animate-btn-shimmer {
+        position: relative;
+        overflow: hidden;
+    }
+    .animate-btn-shimmer::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.18) 50%, transparent 65%);
+        background-size: 200% 100%;
+        animation: btnShimmer 3.5s ease-in-out 1.5s infinite;
+    }
+
     .animate-success-modal {
         animation: successModalIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
@@ -149,6 +171,21 @@
     100% {
         transform: translateX(100%);
     }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-6px); }
+}
+
+@keyframes staggerFadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes btnShimmer {
+    0%   { background-position: 200% center; }
+    100% { background-position: -200% center; }
 }
 
 @keyframes successBackdrop {
