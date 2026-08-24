@@ -37,19 +37,25 @@ export default function Login({ status, canResetPassword }) {
 
             {/* Modal Pop-up Success Overlay */}
             {loginSuccess && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
-                    <div className="bg-[#031433]/95 border border-emerald-500/40 shadow-[0_0_50px_rgba(16,185,129,0.3)] rounded-2xl p-8 max-w-sm w-full text-center space-y-4 animate-scale-in border-t-4 border-t-emerald-500">
-                        <div className="h-16 w-16 bg-emerald-500/10 border-2 border-emerald-500/50 rounded-full flex items-center justify-center mx-auto shadow-[0_0_20px_rgba(16,185,129,0.4)] animate-bounce">
-                            <svg className="h-8 w-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                            </svg>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-success-backdrop" style={{ backgroundColor: 'rgba(0,10,30,0.82)' }}>
+                    <div className="animate-success-modal animate-success-glow relative bg-gradient-to-b from-[#04244d] to-[#021633] border border-emerald-500/30 rounded-3xl px-10 py-12 max-w-[260px] w-full text-center overflow-hidden">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-px bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent" />
+
+                        {/* Icon */}
+                        <div className="relative flex items-center justify-center mx-auto mb-6" style={{ width: 72, height: 72 }}>
+                            <span className="animate-ripple absolute inset-0 rounded-full border border-emerald-400/35" />
+                            <span className="absolute inset-0 rounded-full border border-emerald-500/15" />
+                            <span className="animate-check-ring absolute inset-2 rounded-full bg-emerald-500/10 border border-emerald-400/35 flex items-center justify-center">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
+                                    <path className="animate-check-draw" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </span>
                         </div>
-                        <div>
-                            <h3 className="text-xl font-extrabold text-white tracking-wide">Autentikasi Berhasil</h3>
-                            <p className="text-xs text-gray-300 mt-1 font-medium">Login sukses. Mengalihkan ke Pusat Komando...</p>
-                        </div>
-                        <div className="pt-2 flex justify-center">
-                            <span className="inline-block h-5 w-5 border-2 border-[#d4af37] border-t-transparent rounded-full animate-spin" />
+
+                        <p className="text-base font-bold text-white tracking-wide">Berhasil Masuk</p>
+                        <div className="mt-5 flex items-center justify-center gap-2">
+                            <span className="h-3.5 w-3.5 border-2 border-[#d4af37] border-t-transparent rounded-full animate-spin" />
+                            <span className="text-[10px] font-semibold tracking-widest text-gray-500 uppercase">Mengalihkan...</span>
                         </div>
                     </div>
                 </div>
