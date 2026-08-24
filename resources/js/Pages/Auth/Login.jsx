@@ -37,20 +37,47 @@ export default function Login({ status, canResetPassword }) {
 
             {/* Modal Pop-up Success Overlay */}
             {loginSuccess && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
-                    <div className="bg-[#031433]/95 border border-emerald-500/40 shadow-[0_0_50px_rgba(16,185,129,0.3)] rounded-2xl p-8 max-w-sm w-full text-center space-y-4 animate-scale-in border-t-4 border-t-emerald-500">
-                        <div className="h-16 w-16 bg-emerald-500/10 border-2 border-emerald-500/50 rounded-full flex items-center justify-center mx-auto shadow-[0_0_20px_rgba(16,185,129,0.4)] animate-bounce">
-                            <svg className="h-8 w-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                            </svg>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-success-backdrop" style={{ backgroundColor: 'rgba(0,10,30,0.82)' }}>
+                    {/* Card */}
+                    <div className="animate-success-modal animate-success-glow relative bg-gradient-to-b from-[#04244d] to-[#021633] border border-emerald-500/30 rounded-3xl p-10 max-w-xs w-full text-center overflow-hidden">
+
+                        {/* Ambient top-glow streak */}
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-px bg-gradient-to-r from-transparent via-emerald-400/70 to-transparent" />
+
+                        {/* Icon area */}
+                        <div className="relative flex items-center justify-center mx-auto mb-7" style={{ width: 80, height: 80 }}>
+                            {/* Ripple ring */}
+                            <span className="animate-ripple absolute inset-0 rounded-full border border-emerald-400/40" />
+                            {/* Static outer ring */}
+                            <span className="absolute inset-0 rounded-full border border-emerald-500/20" />
+                            {/* Inner circle */}
+                            <span className="animate-check-ring absolute inset-2 rounded-full bg-emerald-500/10 border border-emerald-400/40 flex items-center justify-center">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
+                                    <path className="animate-check-draw" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </span>
                         </div>
-                        <div>
-                            <h3 className="text-xl font-extrabold text-white tracking-wide">Autentikasi Berhasil</h3>
-                            <p className="text-xs text-gray-300 mt-1 font-medium">Login sukses. Mengalihkan ke Pusat Komando...</p>
+
+                        {/* Text */}
+                        <h3 className="text-xl font-extrabold text-white tracking-wide leading-tight">
+                            Autentikasi Berhasil
+                        </h3>
+                        <p className="text-xs text-emerald-300/80 mt-2 font-medium tracking-wide">
+                            Login sukses. Mengalihkan ke<br />
+                            <span className="text-[#d4af37] font-bold">Pusat Komando</span>...
+                        </p>
+
+                        {/* Separator */}
+                        <div className="my-5 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
+
+                        {/* Spinner row */}
+                        <div className="flex items-center justify-center gap-2.5">
+                            <span className="inline-block h-4 w-4 border-2 border-[#d4af37] border-t-transparent rounded-full animate-spin" />
+                            <span className="text-[11px] font-bold tracking-widest text-gray-400 uppercase">Menghubungkan</span>
                         </div>
-                        <div className="pt-2 flex justify-center">
-                            <span className="inline-block h-5 w-5 border-2 border-[#d4af37] border-t-transparent rounded-full animate-spin" />
-                        </div>
+
+                        {/* Ambient bottom glow */}
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
                     </div>
                 </div>
             )}
