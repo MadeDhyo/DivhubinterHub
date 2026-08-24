@@ -16,13 +16,16 @@ export default function Login({ status, canResetPassword }) {
 
     const submit = (e) => {
         e.preventDefault();
+        setLoginSuccess(true);
 
-        post(route('login'), {
-            onSuccess: () => {
-                setLoginSuccess(true);
-            },
-            onFinish: () => reset('password'),
-        });
+        setTimeout(() => {
+            post(route('login'), {
+                onError: () => {
+                    setLoginSuccess(false);
+                },
+                onFinish: () => reset('password'),
+            });
+        }, 800);
     };
 
     return (
