@@ -4,89 +4,93 @@ namespace App\Services;
 
 use App\Models\Operation;
 use App\Models\OperationChecklistItem;
+use App\Models\ReadinessSnapshot;
 
 class ReadinessService
 {
     /**
-     * Hitung kesiapan operasi berdasarkan checklist wajib (mandatory).
-     *
-     * @param Operation $operation
-     * @return array{
-     *     score: float|int,
-     *     total_mandatory: int,
-     *     completed_mandatory: int,
-     *     status: string,
-     *     has_mandatory_items: bool,
-     *     message: string,
-     *     overdue_items: array,
-     *     has_overdue: bool,
-     *     uncompleted_critical_blockers: array,
-     *     has_uncompleted_critical_blockers: bool
-     * }
+     * Hitung kesiapan operasi berdasarkan skor berbobot (weighted score).
      */
     public function calculate(Operation $operation): array
     {
-        // Pastikan relasi checklist termuat untuk menghindari N+1 query
         $operation->loadMissing('checklists.items.templateItem');
 
-        // Kumpulkan semua item checklist dari setiap checklist dalam operasi
         $allItems = $operation->checklists->flatMap->items;
 
-        // Filter hanya item yang bersifat mandatory (wajib)
         $mandatoryItems = $allItems->filter(function ($item) {
             return $item->templateItem && $item->templateItem->is_mandatory;
         });
 
-        $totalMandatory = $mandatoryItems->count();
-        $completedMandatory = $mandatoryItems->where('status', 'Completed')->count();
+        $totalMandatoryCount = $mandatoryItems->count();
+        $completedMandatoryCount = $mandatoryItems->where('status', 'Completed')->count();
 
-        // 1. Identifikasi item Overdue (belum Completed dan melewati deadline)
+        // Hitung total bobot mandatory dan total bobot mandatory yang completed
+        $totalWeight = 0;
+        $completedWeight = 0;
+
+        foreach ($mandatoryItems as $item) {
+            $baseWeight = (float) ($item->templateItem->weight ?? 1.0);
+            if ($item->templateItem->is_critical && $baseWeight == 1.0) {
+                $baseWeight = 1.5; // Multiplier otomatis untuk critical item jika masih default
+            }
+
+            $totalWeight += $baseWeight;
+
+            if ($item->status === 'Completed' || $item->status === 'Verified') {
+                $completedWeight += $baseWeight;
+            }
+        }
+
+        // Identifikasi Overdue dan Critical Blocker
         $now = now();
         $overdueItems = $allItems->filter(function ($item) use ($now) {
-            return $item->status !== 'Completed' 
+            return !in_array($item->status, ['Completed', 'Verified'])
                 && $item->deadline 
                 && $item->deadline < $now;
         });
 
-        // 2. Identifikasi Critical Blocker yang belum Completed
         $uncompletedCriticalBlockers = $allItems->filter(function ($item) {
-            return $item->status !== 'Completed' && $this->isCriticalBlocker($item);
+            return !in_array($item->status, ['Completed', 'Verified']) && $this->isCriticalBlocker($item);
         });
 
         $hasUncompletedCritical = $uncompletedCriticalBlockers->isNotEmpty();
 
-        // 3. Penanganan Kondisi Khusus: Jika tidak ada item mandatory
-        if ($totalMandatory === 0) {
+        if ($totalMandatoryCount === 0 || $totalWeight === 0) {
             return [
                 'score' => 0,
                 'total_mandatory' => 0,
                 'completed_mandatory' => 0,
+                'total_weight' => 0,
+                'completed_weight' => 0,
                 'status' => 'PENDING_CONFIGURATION',
                 'has_mandatory_items' => false,
-                'message' => 'Operation belum memiliki mandatory checklist yang dikonfigurasi.',
+                'message' => 'Operasi belum memiliki mandatory checklist yang dikonfigurasi.',
                 'overdue_items' => $this->formatItems($overdueItems),
                 'has_overdue' => $overdueItems->isNotEmpty(),
                 'uncompleted_critical_blockers' => $this->formatItems($uncompletedCriticalBlockers),
                 'has_uncompleted_critical_blockers' => $hasUncompletedCritical,
+                'history' => [],
+                'trend' => 'STABLE',
             ];
         }
 
-        // 4. Perhitungan Skor Kesiapan (hanya didasarkan pada item wajib)
-        $score = ($completedMandatory / $totalMandatory) * 100;
+        // Perhitungan Skor Kesiapan Berbobot
+        $score = ($completedWeight / $totalWeight) * 100;
+        $score = round($score, 2);
 
-        // 5. Penentuan Status Berdasarkan Kelayakan Bisnis & Critical Blocker
-        if ($completedMandatory === $totalMandatory && !$hasUncompletedCritical) {
+        // Penentuan Status
+        if ($completedWeight >= $totalWeight && !$hasUncompletedCritical) {
             $status = 'READY';
-            $message = 'Semua persyaratan wajib telah dipenuhi.';
+            $message = 'Semua persyaratan berbobot wajib telah dipenuhi.';
         } else {
-            if ($completedMandatory === $totalMandatory && $hasUncompletedCritical) {
+            if ($completedWeight >= $totalWeight && $hasUncompletedCritical) {
                 $status = 'NOT_READY';
-                $message = 'Seluruh persyaratan wajib telah dipenuhi, tetapi masih terdapat blocker kritis yang belum diselesaikan.';
-            } elseif ($completedMandatory > 0) {
+                $message = 'Seluruh persyaratan wajib terpenuhi, namun terdapat blocker kritis yang belum diselesaikan.';
+            } elseif ($completedWeight > 0) {
                 $status = 'PARTIALLY_READY';
                 $message = $hasUncompletedCritical 
-                    ? "Persyaratan wajib terpenuhi sebagian dan terhambat oleh blocker kritis."
-                    : "Persyaratan wajib baru terpenuhi sebagian ($completedMandatory dari $totalMandatory).";
+                    ? "Persyaratan wajib baru terpenuhi sebagian ($completedMandatoryCount dari $totalMandatoryCount item) dan terhambat blocker kritis."
+                    : "Persyaratan wajib terpenuhi sebagian (Skor $score%).";
             } else {
                 $status = 'NOT_READY';
                 $message = $hasUncompletedCritical 
@@ -95,10 +99,25 @@ class ReadinessService
             }
         }
 
+        // Ambil Riwayat Snapshot
+        $historySnapshots = ReadinessSnapshot::where('operation_id', $operation->id)
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $trend = 'STABLE';
+        if ($historySnapshots->count() >= 2) {
+            $lastScore = $historySnapshots[$historySnapshots->count() - 1]->score;
+            $prevScore = $historySnapshots[$historySnapshots->count() - 2]->score;
+            if ($lastScore > $prevScore) $trend = 'UP';
+            elseif ($lastScore < $prevScore) $trend = 'DOWN';
+        }
+
         return [
-            'score' => round($score, 2),
-            'total_mandatory' => $totalMandatory,
-            'completed_mandatory' => $completedMandatory,
+            'score' => $score,
+            'total_mandatory' => $totalMandatoryCount,
+            'completed_mandatory' => $completedMandatoryCount,
+            'total_weight' => round($totalWeight, 2),
+            'completed_weight' => round($completedWeight, 2),
             'status' => $status,
             'has_mandatory_items' => true,
             'message' => $message,
@@ -106,15 +125,32 @@ class ReadinessService
             'has_overdue' => $overdueItems->isNotEmpty(),
             'uncompleted_critical_blockers' => $this->formatItems($uncompletedCriticalBlockers),
             'has_uncompleted_critical_blockers' => $hasUncompletedCritical,
+            'history' => $historySnapshots->map(fn($s) => [
+                'id' => $s->id,
+                'score' => $s->score,
+                'status' => $s->status,
+                'date' => $s->created_at->format('d M H:i'),
+            ])->toArray(),
+            'trend' => $trend,
         ];
     }
 
     /**
-     * Tentukan apakah item checklist adalah critical blocker.
-     *
-     * @param OperationChecklistItem $item
-     * @return bool
+     * Record a snapshot of readiness score in database
      */
+    public function recordSnapshot(Operation $operation, ?int $userId = null): ReadinessSnapshot
+    {
+        $readiness = $this->calculate($operation);
+
+        return ReadinessSnapshot::create([
+            'operation_id' => $operation->id,
+            'score' => $readiness['score'],
+            'status' => $readiness['status'],
+            'snapshot_data' => $readiness,
+            'evaluated_by' => $userId ?? auth()->id(),
+        ]);
+    }
+
     public function isCriticalBlocker(OperationChecklistItem $item): bool
     {
         if (!$item->templateItem) {
@@ -124,9 +160,6 @@ class ReadinessService
         return (bool) $item->templateItem->is_critical;
     }
 
-    /**
-     * Helper untuk memformat output data item checklist.
-     */
     private function formatItems($itemsCollection): array
     {
         return $itemsCollection->map(fn($item) => [

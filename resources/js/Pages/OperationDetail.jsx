@@ -1,5 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import NotificationDropdown from '@/Components/NotificationDropdown';
 
 export default function OperationDetail({ auth, operation, readiness }) {
     const [activeTab, setActiveTab] = useState('overview');
@@ -175,13 +176,7 @@ export default function OperationDetail({ auth, operation, readiness }) {
 
                         {/* Profile & Notifications */}
                         <div className="flex items-center gap-6">
-                            <button className="relative p-2 hover:bg-white/5 rounded-full text-gray-300 hover:text-white transition">
-                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                </svg>
-                                <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />
-                            </button>
-
+                            <NotificationDropdown />
                             <div className="h-8 w-px bg-white/10 hidden sm:block" />
 
                             <div className="flex items-center gap-3">
@@ -387,42 +382,42 @@ export default function OperationDetail({ auth, operation, readiness }) {
                                                 <ul className="divide-y divide-white/5">
                                                     {checklist.items.map(item => (
                                                         <li key={item.id} className="p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 hover:bg-white/5 transition">
-                                                            <div>
+                                                            <div className="space-y-1">
                                                                 <span className="font-medium text-white flex items-center gap-1.5">
                                                                     {item.template_item?.name}
                                                                     {item.template_item?.is_mandatory && <span className="text-red-500 font-bold" title="Mandatory">*</span>}
                                                                     {item.template_item?.is_critical && <span className="px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-red-500/10 text-red-400 border border-red-500/20 uppercase">CRITICAL</span>}
                                                                 </span>
                                                             </div>
-                                                                <div className="flex items-center gap-3 self-end sm:self-auto">
-                                                                    <select
-                                                                        className="text-xs bg-[#031433] border-white/10 text-white rounded-md shadow-sm focus:border-[#d4af37] focus:ring-[#d4af37]"
-                                                                        value={item.status}
-                                                                        onChange={(e) => handleStatusChange(item.id, e.target.value)}
-                                                                        disabled={
-                                                                            (auth.user.role === 'staf' && (item.status === 'Verified' || item.status === 'Rejected'))
-                                                                        }
-                                                                    >
-                                                                        <option value="Not Started" disabled={auth.user.role !== 'staf'}>Not Started</option>
-                                                                        <option value="In Progress" disabled={auth.user.role !== 'staf'}>In Progress</option>
-                                                                        <option value="Completed" disabled={auth.user.role !== 'staf'}>Completed</option>
-                                                                        {(auth.user.role === 'admin' || auth.user.role === 'pimpinan' || item.status === 'Verified' || item.status === 'Rejected') && (
-                                                                            <>
-                                                                                <option value="Verified" disabled={auth.user.role === 'staf'}>Verified</option>
-                                                                                <option value="Rejected" disabled={auth.user.role === 'staf'}>Rejected</option>
-                                                                            </>
-                                                                        )}
-                                                                    </select>
-                                                                    <span className={`px-2.5 py-0.5 text-[10px] rounded-full font-bold uppercase tracking-wider ${
-                                                                        item.status === 'Verified' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
-                                                                        item.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                                                                        item.status === 'In Progress' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' :
-                                                                        item.status === 'Rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
-                                                                        'bg-gray-500/10 text-gray-400 border border-gray-500/20'
-                                                                    }`}>
-                                                                        {item.status}
-                                                                    </span>
-                                                                </div>
+                                                            <div className="flex items-center gap-3 self-end sm:self-auto">
+                                                                <select
+                                                                    className="text-xs bg-[#031433] border-white/10 text-white rounded-md shadow-sm focus:border-[#d4af37] focus:ring-[#d4af37]"
+                                                                    value={item.status}
+                                                                    onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                                                                    disabled={
+                                                                        (auth.user.role === 'staf' && (item.status === 'Verified' || item.status === 'Rejected'))
+                                                                    }
+                                                                >
+                                                                    <option value="Not Started" disabled={auth.user.role !== 'staf'}>Not Started</option>
+                                                                    <option value="In Progress" disabled={auth.user.role !== 'staf'}>In Progress</option>
+                                                                    <option value="Completed" disabled={auth.user.role !== 'staf'}>Completed</option>
+                                                                    {(auth.user.role === 'admin' || auth.user.role === 'pimpinan' || item.status === 'Verified' || item.status === 'Rejected') && (
+                                                                        <>
+                                                                            <option value="Verified" disabled={auth.user.role === 'staf'}>Verified</option>
+                                                                            <option value="Rejected" disabled={auth.user.role === 'staf'}>Rejected</option>
+                                                                        </>
+                                                                    )}
+                                                                </select>
+                                                                <span className={`px-2.5 py-0.5 text-[10px] rounded-full font-bold uppercase tracking-wider ${
+                                                                    item.status === 'Verified' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                                                                    item.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                                                    item.status === 'In Progress' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' :
+                                                                    item.status === 'Rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                                                    'bg-gray-500/10 text-gray-400 border border-gray-500/20'
+                                                                }`}>
+                                                                    {item.status}
+                                                                </span>
+                                                            </div>
                                                         </li>
                                                     ))}
                                                 </ul>
@@ -437,16 +432,27 @@ export default function OperationDetail({ auth, operation, readiness }) {
                             {/* Tab: Readiness */}
                             {activeTab === 'readiness' && readiness && (
                                 <div className="space-y-6">
-                                    <h3 className="text-lg font-bold text-[#d4af37] border-b border-white/10 pb-3">Readiness Assessment</h3>
+                                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                                        <h3 className="text-lg font-bold text-[#d4af37]">Readiness Assessment & Weighted Score</h3>
+                                        {readiness.trend && (
+                                            <span className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider flex items-center gap-1 ${
+                                                readiness.trend === 'UP' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                                readiness.trend === 'DOWN' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                                'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                                            }`}>
+                                                {readiness.trend === 'UP' ? '▲ Trend Naik' : readiness.trend === 'DOWN' ? '▼ Trend Turun' : '● Trend Stabil'}
+                                            </span>
+                                        )}
+                                    </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                         <div className="bg-[#001b3d]/50 border border-white/10 rounded-lg p-5 shadow-sm flex flex-col items-center justify-center">
-                                            <span className="text-sm text-gray-400 font-medium">Readiness Score</span>
+                                            <span className="text-sm text-gray-400 font-medium">Weighted Score</span>
                                             <span className="text-4xl font-extrabold text-[#d4af37] mt-2">{readiness.score}%</span>
                                         </div>
                                         <div className="bg-[#001b3d]/50 border border-white/10 rounded-lg p-5 shadow-sm flex flex-col items-center justify-center">
-                                            <span className="text-sm text-gray-400 font-medium">Readiness Status</span>
-                                            <span className={`inline-flex items-center px-3 py-1 mt-3 rounded-full text-sm font-bold uppercase tracking-wider ${
+                                            <span className="text-sm text-gray-400 font-medium">Status Kesiapan</span>
+                                            <span className={`inline-flex items-center px-3 py-1 mt-3 rounded-full text-xs font-bold uppercase tracking-wider ${
                                                 readiness.status === 'READY' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
                                                 readiness.status === 'PARTIALLY_READY' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' :
                                                 readiness.status === 'PENDING_CONFIGURATION' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
@@ -455,19 +461,39 @@ export default function OperationDetail({ auth, operation, readiness }) {
                                             </span>
                                         </div>
                                         <div className="bg-[#001b3d]/50 border border-white/10 rounded-lg p-5 shadow-sm flex flex-col items-center justify-center">
-                                            <span className="text-sm text-gray-400 font-medium">Mandatory Checklist Progress</span>
+                                            <span className="text-sm text-gray-400 font-medium">Akumulasi Bobot</span>
+                                            <span className="text-2xl font-bold text-white mt-2">{readiness.completed_weight} / {readiness.total_weight}</span>
+                                            <span className="text-xs text-gray-500 mt-1">total bobot diselesaikan</span>
+                                        </div>
+                                        <div className="bg-[#001b3d]/50 border border-white/10 rounded-lg p-5 shadow-sm flex flex-col items-center justify-center">
+                                            <span className="text-sm text-gray-400 font-medium">Progress Mandatory</span>
                                             <span className="text-2xl font-bold text-white mt-2">{readiness.completed_mandatory} / {readiness.total_mandatory}</span>
-                                            <span className="text-xs text-gray-500 mt-1">items completed</span>
+                                            <span className="text-xs text-gray-500 mt-1">item diselesaikan</span>
                                         </div>
                                     </div>
 
-                                    <div className="p-4 bg-blue-500/10 border-l-4 border-blue-500 text-blue-300 rounded-r-md text-sm">
+                                    <div className="p-4 bg-blue-500/10 border-l-4 border-blue-500 text-blue-300 rounded-r-md text-sm font-medium">
                                         {readiness.message}
                                     </div>
 
-                                    {!readiness.has_mandatory_items && (
-                                        <div className="p-4 bg-yellow-500/10 border-l-4 border-yellow-500 text-yellow-300 rounded-r-md text-sm">
-                                            <strong>Peringatan:</strong> Operasi ini belum memiliki konfigurasi item checklist wajib (mandatory).
+                                    {/* Snapshot Histori Tren */}
+                                    {readiness.history && readiness.history.length > 0 && (
+                                        <div className="border border-white/10 rounded-lg p-5 shadow-sm bg-[#001b3d]/50">
+                                            <h4 className="font-bold text-[#d4af37] mb-4 flex items-center gap-2">
+                                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                                </svg>
+                                                Riwayat Snapshot Skor Kesiapan (Timeline)
+                                            </h4>
+                                            <div className="flex items-center gap-4 overflow-x-auto pb-2">
+                                                {readiness.history.map((snapshot, idx) => (
+                                                    <div key={snapshot.id} className="min-w-[140px] bg-white/5 border border-white/10 rounded-lg p-3 text-center">
+                                                        <p className="text-[10px] text-gray-400 font-mono">{snapshot.date}</p>
+                                                        <p className="text-lg font-extrabold text-[#d4af37] mt-1">{snapshot.score}%</p>
+                                                        <span className="text-[9px] font-bold uppercase text-gray-300">{snapshot.status}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     )}
 

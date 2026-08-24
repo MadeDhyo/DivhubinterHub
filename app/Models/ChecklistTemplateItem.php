@@ -11,5 +11,6 @@ class ChecklistTemplateItem extends Model
     protected $casts = [
         'is_mandatory' => 'boolean',
         'is_critical' => 'boolean',
+        'weight' => 'float',
     ];
 }

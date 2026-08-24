@@ -84,8 +84,12 @@ class AppServiceProvider extends ServiceProvider
             return $this->isAdminOrPimpinan($user);
         });
 
-        // 7. Admin Access (Hanya Admin)
+        // 7. Admin Access & User Management (Hanya Admin)
         Gate::define('admin-access', function (User $user) {
+            return $user->isAdmin();
+        });
+
+        Gate::define('manage-users', function (User $user) {
             return $user->isAdmin();
         });
     }

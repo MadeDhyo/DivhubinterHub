@@ -10,7 +10,12 @@ class ActivityLog extends Model
         'user_id',
         'action',
         'description',
+        'properties',
         'ip_address',
+    ];
+
+    protected $casts = [
+        'properties' => 'array',
     ];
 
     public function user()
@@ -19,14 +24,20 @@ class ActivityLog extends Model
     }
 
     /**
-     * Helper to log system activity easily
+     * Helper untuk mencatat log aktivitas sistem lengkap dengan diff (old vs new)
      */
-    public static function record($action, $description = null)
+    public static function record($action, $description = null, array $old = null, array $new = null, array $extra = null)
     {
+        $payload = [];
+        if ($old !== null) $payload['old'] = $old;
+        if ($new !== null) $payload['new'] = $new;
+        if ($extra !== null) $payload['extra'] = $extra;
+
         return static::create([
             'user_id' => auth()->id(),
             'action' => $action,
             'description' => $description,
+            'properties' => empty($payload) ? null : $payload,
             'ip_address' => request()->ip(),
         ]);
     }

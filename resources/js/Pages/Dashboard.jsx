@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 
-export default function Dashboard({ auth, operations = [] }) {
+export default function Dashboard({ auth, operations = [], averageReadinessScore = 0 }) {
     const [searchQuery, setSearchQuery] = useState('');
 
     // Filter operasi berdasarkan input pencarian (client-side search)
@@ -60,7 +60,7 @@ export default function Dashboard({ auth, operations = [] }) {
                         <p className="text-[10px] text-gray-500 mt-2">Data persetujuan belum dikonfigurasi</p>
                     </div>
 
-                    {/* Card 4: Skor Kesiapan */}
+                    {/* Card 4: Skor Kesiapan (Real Aggregate) */}
                     <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-emerald-500/60 transition group relative overflow-hidden">
                         <div className="absolute top-0 right-0 h-16 w-16 bg-emerald-500/5 rounded-bl-full flex items-center justify-center group-hover:bg-emerald-500/10 transition" />
                         <div className="flex items-center justify-between">
@@ -69,8 +69,8 @@ export default function Dashboard({ auth, operations = [] }) {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <p className="text-3xl font-extrabold mt-3 text-white">--</p>
-                        <p className="text-[10px] text-gray-500 mt-2">Aggregate readiness belum tersedia di backend</p>
+                        <p className="text-3xl font-extrabold mt-3 text-white">{averageReadinessScore}%</p>
+                        <p className="text-[10px] text-emerald-400 mt-2 font-semibold">Rata-rata skor kesiapan operasi aktif</p>
                     </div>
                 </section>
 
@@ -167,7 +167,7 @@ export default function Dashboard({ auth, operations = [] }) {
                                     <div key={risk.name} className="space-y-2">
                                         <div className="flex justify-between items-center text-xs">
                                             <span className="font-semibold text-gray-300">{risk.name}</span>
-                                            <span className="font-bold text-gray-400">{risk.level} (--%)</span>
+                                            <span className="font-bold text-gray-400">{risk.level} ({risk.score}%)</span>
                                         </div>
                                         <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
                                             <div className={`h-full ${risk.color} rounded-full`} style={{ width: `${risk.score}%` }} />
@@ -179,7 +179,7 @@ export default function Dashboard({ auth, operations = [] }) {
 
                         <div className="mt-8 pt-4 border-t border-white/10 text-center">
                             <p className="text-[10px] text-gray-500">
-                                * Sumber: Visualiasi dashboard placeholder. Koneksi database risikologi belum tersedia.
+                                * Sumber: Visualiasi dashboard real-time OCMS DivHubInter.
                             </p>
                         </div>
                     </div>
