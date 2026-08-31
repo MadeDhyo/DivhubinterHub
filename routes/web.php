@@ -10,12 +10,7 @@ use App\Http\Controllers\BusinessProcessController;
 use App\Http\Controllers\ChecklistController;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return auth()->check() ? redirect()->route('dashboard') : redirect()->route('login');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
