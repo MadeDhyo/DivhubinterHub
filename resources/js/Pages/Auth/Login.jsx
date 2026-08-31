@@ -1,14 +1,16 @@
 import InputError from '@/Components/InputError';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import axios from 'axios';
 
 export default function Login({ status, canResetPassword }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const [data, setData] = useState({
         email: '',
         password: '',
         remember: false,
     });
-
+    const [errors, setErrors] = useState({});
+    const [processing, setProcessing] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [loginSuccess, setLoginSuccess] = useState(false);
 
@@ -16,16 +18,28 @@ export default function Login({ status, canResetPassword }) {
 
     const submit = (e) => {
         e.preventDefault();
-        setLoginSuccess(true);
+        setProcessing(true);
+        setErrors({});
 
-        setTimeout(() => {
-            post(route('login'), {
-                onError: () => {
-                    setLoginSuccess(false);
-                },
-                onFinish: () => reset('password'),
+        axios.post(route('login'), data)
+            .then(() => {
+                setProcessing(false);
+                setLoginSuccess(true);
+                setTimeout(() => {
+                    router.visit(route('dashboard'));
+                }, 800);
+            })
+            .catch((error) => {
+                setProcessing(false);
+                setLoginSuccess(false);
+                if (error.response?.data?.errors) {
+                    setErrors(error.response.data.errors);
+                } else if (error.response?.data?.message) {
+                    setErrors({ email: [error.response.data.message] });
+                } else {
+                    setErrors({ email: ['Otentikasi gagal. Periksa kembali email & password.'] });
+                }
             });
-        }, 800);
     };
 
     return (
@@ -34,32 +48,20 @@ export default function Login({ status, canResetPassword }) {
 
             <Head title="Log in" />
 
-            {/* Success Modal */}
+            {/* Simple Clean Checklist Success Modal */}
             {loginSuccess && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-success-backdrop" style={{ backgroundColor: 'rgba(0,10,30,0.82)' }}>
-                    <div className="animate-success-modal animate-success-glow relative bg-gradient-to-b from-[#04244d] to-[#021633] border border-emerald-500/30 rounded-3xl p-10 max-w-xs w-full text-center overflow-hidden">
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
-
-                        <div className="relative flex items-center justify-center mx-auto mb-7" style={{ width: 80, height: 80 }}>
-                            <span className="animate-ripple absolute inset-0 rounded-full border border-emerald-400/30" />
-                            <span className="absolute inset-0 rounded-full border border-emerald-500/15" />
-                            <span className="animate-check-ring absolute inset-2 rounded-full bg-emerald-500/10 border border-emerald-400/30 flex items-center justify-center">
-                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
-                                    <path className="animate-check-draw" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </span>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-[#031433] border border-emerald-500/40 shadow-2xl rounded-2xl p-7 max-w-[280px] w-full text-center space-y-3.5 animate-scale-in">
+                        {/* Clean Animated Checkmark Circle */}
+                        <div className="h-14 w-14 bg-emerald-500/15 border border-emerald-500/40 rounded-full flex items-center justify-center mx-auto text-emerald-400">
+                            <svg className="h-7 w-7 animate-scale-in" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                            </svg>
                         </div>
 
-                        <h3 className="text-lg font-bold text-white tracking-wide">Autentikasi Berhasil</h3>
-                        <p className="text-xs text-gray-400 mt-1.5 font-medium">
-                            Mengalihkan ke <span className="text-[#d4af37]">Pusat Komando</span>...
-                        </p>
-
-                        <div className="my-5 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-                        <div className="flex items-center justify-center gap-2">
-                            <span className="h-3.5 w-3.5 border-2 border-[#d4af37] border-t-transparent rounded-full animate-spin" />
-                            <span className="text-[10px] font-semibold tracking-widest text-gray-500 uppercase">Menghubungkan</span>
+                        <div>
+                            <h3 className="text-base font-bold text-white tracking-wide">Autentikasi Berhasil</h3>
+                            <p className="text-xs text-gray-400 mt-1 font-medium">Mengalihkan ke Pusat Komando...</p>
                         </div>
                     </div>
                 </div>
@@ -101,7 +103,7 @@ export default function Login({ status, canResetPassword }) {
                 {hasErrors && !loginSuccess && (
                     <div className="mb-5 px-3.5 py-2.5 rounded-lg bg-red-500/8 border border-red-500/20 text-xs font-semibold text-red-400/90 animate-slide-down flex items-center gap-2.5">
                         <span className="h-1.5 w-1.5 rounded-full bg-red-400 shrink-0 animate-pulse" />
-                        Otentikasi gagal. Periksa kembali kredensial Anda.
+                        {Array.isArray(errors.email) ? errors.email[0] : (typeof errors.email === 'string' ? errors.email : 'Otentikasi gagal. Periksa kembali email & password Anda.')}
                     </div>
                 )}
 
@@ -117,7 +119,6 @@ export default function Login({ status, canResetPassword }) {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                             </span>
-                            {/* animated left accent bar */}
                             <span className="absolute inset-y-1 left-0 w-0.5 rounded-full bg-[#d4af37] scale-y-0 origin-center group-focus-within:scale-y-100 transition-transform duration-200" />
                             <input
                                 id="email"
@@ -128,10 +129,12 @@ export default function Login({ status, canResetPassword }) {
                                 className="w-full bg-white/[0.04] border border-white/8 rounded-lg pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#d4af37]/50 focus:bg-white/[0.06] transition-all duration-200"
                                 autoComplete="username"
                                 required
-                                onChange={(e) => setData('email', e.target.value)}
+                                onChange={(e) => setData({ ...data, email: e.target.value })}
                             />
                         </div>
-                        <InputError message={errors.email} className="mt-1.5 text-xs text-red-400/80 animate-slide-down" />
+                        {errors.email && (
+                            <InputError message={Array.isArray(errors.email) ? errors.email[0] : errors.email} className="mt-1.5 text-xs text-red-400/80 animate-slide-down" />
+                        )}
                     </div>
 
                     {/* PASSWORD */}
@@ -155,7 +158,7 @@ export default function Login({ status, canResetPassword }) {
                                 className="w-full bg-white/[0.04] border border-white/8 rounded-lg pl-10 pr-10 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#d4af37]/50 focus:bg-white/[0.06] transition-all duration-200"
                                 autoComplete="current-password"
                                 required
-                                onChange={(e) => setData('password', e.target.value)}
+                                onChange={(e) => setData({ ...data, password: e.target.value })}
                             />
                             <button
                                 type="button"
@@ -174,7 +177,9 @@ export default function Login({ status, canResetPassword }) {
                                 )}
                             </button>
                         </div>
-                        <InputError message={errors.password} className="mt-1.5 text-xs text-red-400/80 animate-slide-down" />
+                        {errors.password && (
+                            <InputError message={Array.isArray(errors.password) ? errors.password[0] : errors.password} className="mt-1.5 text-xs text-red-400/80 animate-slide-down" />
+                        )}
                     </div>
 
                     {/* Remember & Forgot */}
@@ -184,7 +189,7 @@ export default function Login({ status, canResetPassword }) {
                                 type="checkbox"
                                 name="remember"
                                 checked={data.remember}
-                                onChange={(e) => setData('remember', e.target.checked)}
+                                onChange={(e) => setData({ ...data, remember: e.target.checked })}
                                 className="rounded bg-transparent border-white/20 text-[#d4af37] focus:ring-0 focus:ring-offset-0 transition cursor-pointer"
                             />
                             <span className="ms-2 text-xs text-gray-500 group-hover:text-gray-300 transition-colors duration-150">
