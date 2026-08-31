@@ -9,6 +9,29 @@ use Illuminate\Support\Facades\Storage;
 class GeminiVerificationService
 {
     /**
+     * Memverifikasi dokumen menggunakan konten file mentah (bytes) langsung.
+     * Lebih efisien karena tidak perlu tulis/baca temp file.
+     *
+     * @param  string  $fileContent  Konten file mentah (raw bytes)
+     * @param  string  $mimeType     MIME type file (misal: application/pdf)
+     * @param  string  $prompt       Instruksi validasi AI
+     * @return array{is_valid: bool, reason: string}
+     */
+    public function verifyRawContent(string $fileContent, string $mimeType, string $prompt): array
+    {
+        $apiKey = config('services.gemini.api_key');
+        $model  = config('services.gemini.model', 'gemini-2.0-flash');
+
+        if (empty($apiKey)) {
+            Log::warning('[GeminiAI] GEMINI_API_KEY belum diisi di .env');
+            return ['is_valid' => false, 'reason' => 'Konfigurasi GEMINI_API_KEY belum diatur di server.'];
+        }
+
+        $base64Data = base64_encode($fileContent);
+        return $this->callGeminiApi($apiKey, $model, $base64Data, $mimeType, $prompt);
+    }
+
+    /**
      * Memverifikasi sebuah file dokumen menggunakan Gemini AI
      * berdasarkan prompt/instruksi yang sudah ditentukan.
      *
@@ -42,7 +65,14 @@ class GeminiVerificationService
         $mimeType     = Storage::disk('public')->mimeType($filePath);
         $base64Data   = base64_encode($fileContents);
 
-        // Susun pesan yang dikirim ke Gemini
+        return $this->callGeminiApi($apiKey, $model, $base64Data, $mimeType, $prompt);
+    }
+
+    /**
+     * Shared internal method: build payload and call Gemini API.
+     */
+    private function callGeminiApi(string $apiKey, string $model, string $base64Data, string $mimeType, string $prompt): array
+    {
         $systemInstruction = <<<EOT
 Kamu adalah sistem verifikasi dokumen otomatis untuk NCB Interpol Indonesia.
 Tugasmu adalah menganalisis dokumen yang diberikan dan menentukan apakah dokumen tersebut
@@ -82,7 +112,7 @@ EOT;
         try {
             $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent";
 
-            $response = Http::timeout(30)
+            $response = Http::timeout(120)
                 ->withHeaders([
                     'Content-Type'   => 'application/json',
                     'x-goog-api-key' => trim($apiKey),

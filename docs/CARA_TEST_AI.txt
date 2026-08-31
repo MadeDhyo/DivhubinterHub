@@ -1,0 +1,116 @@
+CARA NGETEST FITUR AI VERIFIKASI DOKUMEN
+=========================================
+
+Fitur ini gunanya buat ngecek dokumen secara otomatis pake AI.
+Jadi pas kamu upload berkas, AI bakal ngecek itu dokumen bener apa engga.
+
+Ikutin langkah-langkah di bawah ini ya, pelan-pelan aja:
+
+
+LANGKAH 1 - NYALAIN LARAGON
+----------------------------
+- Buka Laragon
+- Klik "Start All" (pastikan MySQL sama Apache warnanya ijo/hijau)
+
+
+LANGKAH 2 - BUKA TERMINAL
+--------------------------
+- Buka terminal/CMD di folder project DivhubinterHub
+- Ketik perintah ini satu per satu:
+
+  composer install
+  npm install
+  php artisan migrate
+  npm run build
+  php artisan serve
+
+
+LANGKAH 3 - ISI API KEY GEMINI
+-------------------------------
+- Buka file .env (ada di folder utama project)
+- Scroll ke paling bawah
+- Cari tulisan GEMINI_API_KEY=
+- Isi dengan API key Gemini kamu
+
+  Belum punya API Key? Begini caranya:
+  1. Buka browser, masuk ke: https://aistudio.google.com/app/apikey
+  2. Login pake akun Gmail pribadi kamu
+  3. Klik tombol "Create API key"
+  4. Klik "Create API key in new project"
+  5. Nanti muncul kode panjang, itu API key nya
+  6. Copy kode itu, tempel ke .env setelah GEMINI_API_KEY=
+
+
+LANGKAH 4 - SIAPIN FILE BUAT TEST
+----------------------------------
+- Cari foto KTP / Paspor / SIM kamu (bisa foto dari HP, ga harus scan)
+- Copy file foto itu ke folder:
+
+  storage\app\public\checklists\attachments\
+
+- Rename file nya jadi: test_dokumen.jpg
+  (kalo file nya PNG, rename jadi test_dokumen.png)
+
+
+LANGKAH 5 - UPDATE DATABASE
+----------------------------
+- Buka browser, ketik: localhost:8080/phpmyadmin
+- Di sebelah kiri, klik database "ocms_db"
+- Klik tabel "operation_checklist_items"
+- Klik "Edit" di baris pertama (ID 1)
+- Cari kolom "attachment_path", isi dengan:
+
+  checklists/attachments/test_dokumen.jpg
+
+- Cari kolom "status", isi dengan:
+
+  In Progress
+
+- Klik "Go" / "Simpan" di bawah
+
+
+LANGKAH 6 - JALANIN TEST NYA
+-----------------------------
+- Buka terminal baru (jangan tutup yang lama)
+- Ketik perintah ini:
+
+  php artisan test:ai-verify 1 --sync
+
+- Tunggu beberapa detik sampai muncul tulisan "Selesai!"
+
+
+LANGKAH 7 - CEK HASILNYA
+-------------------------
+- Balik ke phpMyAdmin di browser
+- Klik tabel "operation_checklist_items" lagi
+- Lihat baris ID 1:
+
+  * Kolom "status" harusnya berubah jadi "Verified" atau "Rejected"
+  * Kolom "ai_validation_result" ada tulisan alasan dari AI
+
+  Contoh hasil:
+  - Kalo kamu upload KTP asli -> status jadi "Verified"
+  - Kalo kamu upload foto selfie -> status jadi "Rejected"
+    alasannya: "bukan dokumen identitas resmi"
+
+
+MAU TEST LAGI PAKE FILE LAIN?
+------------------------------
+1. Ganti file di folder storage\app\public\checklists\attachments\
+2. Buka phpMyAdmin, ubah status item jadi "In Progress" lagi
+3. Jalanin lagi: php artisan test:ai-verify 1 --sync
+4. Cek hasilnya di phpMyAdmin
+
+
+KALO ADA ERROR
+--------------
+- "GEMINI_API_KEY belum diatur"
+  -> Cek file .env, pastikan GEMINI_API_KEY sudah diisi
+
+- "File dokumen tidak ditemukan"
+  -> Cek file nya udah ada di storage\app\public\checklists\attachments\ belum
+
+- "HTTP 401"
+  -> API Key nya salah. Bikin ulang di https://aistudio.google.com/app/apikey
+
+- Kalo masih bingung, hubungi Ivander :)

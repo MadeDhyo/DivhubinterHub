@@ -25,7 +25,13 @@ class ChecklistController extends Controller
             Gate::authorize('update-checklist-item', $item);
         }
 
-        $item->update(['status' => $newStatus]);
+        $updateData = ['status' => $newStatus];
+        if ($newStatus === 'Rejected' && $request->has('rejection_reason')) {
+            $updateData['rejection_reason'] = $request->rejection_reason;
+        } elseif ($newStatus !== 'Rejected') {
+            $updateData['rejection_reason'] = null; // clear reason when not rejected
+        }
+        $item->update($updateData);
 
         $itemName = $item->templateItem?->name ?? "Item #{$item->id}";
         $operation = $item->operationChecklist?->operation;

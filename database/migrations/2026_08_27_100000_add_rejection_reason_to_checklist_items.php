@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('users', 'role')) {
-            Schema::table('users', function (Blueprint $table) {
-                $table->string('role')->default('staf')->after('email');
-            });
-        }
+        Schema::table('operation_checklist_items', function (Blueprint $table) {
+            $table->text('rejection_reason')->nullable()->after('ai_validation_result');
+        });
     }
 
     /**
@@ -23,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('role');
+        Schema::table('operation_checklist_items', function (Blueprint $table) {
+            $table->dropColumn('rejection_reason');
         });
     }
 };

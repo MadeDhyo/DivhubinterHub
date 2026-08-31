@@ -17,4 +17,9 @@ class Operation extends Model
     {
         return $this->hasMany(OperationChecklist::class);
     }
+
+    public function documents()
+    {
+        return $this->hasMany(Document::class);
+    }
 }

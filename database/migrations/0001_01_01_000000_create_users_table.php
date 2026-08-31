@@ -17,6 +17,9 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('nip')->nullable();
+            $table->string('role')->default('case_officer'); // admin, planning_officer, case_officer, supervisor, approver, auditor
+            $table->string('classification_clearance')->default('RAHASIA'); // SANGAT_RAHASIA, RAHASIA, TERBATAS, BIASA
             $table->rememberToken();
             $table->timestamps();
         });
