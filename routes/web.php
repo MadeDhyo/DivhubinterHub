@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -39,6 +39,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/activity-logs', [\App\Http\Controllers\ActivityLogController::class, 'index'])->name('activity-logs.index');
     });
+    // Documents
+    Route::post('/documents', [\App\Http\Controllers\DocumentController::class, 'store'])->name('documents.store');
+    Route::get('/documents/{id}/download', [\App\Http\Controllers\DocumentController::class, 'download'])->name('documents.download');
+    Route::delete('/documents/{id}', [\App\Http\Controllers\DocumentController::class, 'destroy'])->name('documents.destroy');
+    Route::post('/documents/{id}/versions', [\App\Http\Controllers\DocumentController::class, 'uploadVersion'])->name('documents.versions.store');
 });
 
 Route::middleware('auth')->group(function () {
@@ -50,3 +55,4 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/auth.php';
 
 Route::get('/business-processes', [BusinessProcessController::class, 'index']);
+
