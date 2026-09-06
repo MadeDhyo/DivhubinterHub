@@ -39,10 +39,7 @@ class LanAccessMiddleware
 
             if (!$machineOnAllowedNetwork) {
                 $this->logBlockedAccess($clientIp, $allowedSubnets, $machineIps);
-                abort(403, sprintf(
-                    'AKSES DITOLAK: Server ini tidak terhubung ke jaringan LAN resmi NCB Interpol. IP jaringan aktual: %s',
-                    implode(', ', $machineIps) ?: 'tidak terdeteksi'
-                ));
+                abort(403, 'AKSES DITOLAK: Akses hanya diizinkan melalui jaringan LAN resmi NCB Interpol.');
             }
 
             return $next($request);
@@ -51,10 +48,7 @@ class LanAccessMiddleware
         // For remote clients, check their IP directly
         if (!$this->isIpAllowed($clientIp, $allowedSubnets)) {
             $this->logBlockedAccess($clientIp, $allowedSubnets);
-            abort(403, sprintf(
-                'AKSES DITOLAK: Perangkat Anda (%s) tidak terhubung ke jaringan LAN resmi NCB Interpol.',
-                $clientIp
-            ));
+            abort(403, 'AKSES DITOLAK: Akses hanya diizinkan melalui jaringan LAN resmi NCB Interpol.');
         }
 
         return $next($request);
