@@ -14,9 +14,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            \App\Http\Middleware\SecurityHeadersMiddleware::class,
+            \App\Http\Middleware\LanAccessMiddleware::class,
         ]);
 
-        //
+        $middleware->alias([
+            'clearance' => \App\Http\Middleware\SecurityClassificationMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

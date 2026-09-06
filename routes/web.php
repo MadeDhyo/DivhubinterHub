@@ -18,10 +18,22 @@ Route::get('/', function () {
     ]);
 });
 
+use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\AuditLogController;
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/operations/{id}', [OperationController::class, 'show'])->name('operations.show');
     Route::post('/checklists/{id}/status', [ChecklistController::class, 'updateStatus'])->name('checklists.updateStatus');
+
+    // Document Management Routes
+    Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
+    Route::post('/documents/{id}/versions', [DocumentController::class, 'uploadVersion'])->name('documents.uploadVersion');
+    Route::get('/documents/{id}/download/{versionId?}', [DocumentController::class, 'download'])->name('documents.download');
+    Route::get('/documents/{id}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
+
+    // Audit Log Routes
+    Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
 });
 
 Route::middleware('auth')->group(function () {
