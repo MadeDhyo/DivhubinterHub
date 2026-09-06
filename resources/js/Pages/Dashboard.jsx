@@ -74,9 +74,9 @@ export default function Dashboard({ auth, operations = [], averageReadinessScore
                 )}
 
                 {/* SUMMARY CARDS */}
-                <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
                     {/* Card 1: Kasus Aktif */}
-                    <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-[#d4af37]/60 transition group relative overflow-hidden">
+                    <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-[#d4af37]/60 transition group relative overflow-hidden animate-stagger-1 hover:-translate-y-1 duration-300">
                         <div className="absolute top-0 right-0 h-16 w-16 bg-[#d4af37]/5 rounded-bl-full flex items-center justify-center group-hover:bg-[#d4af37]/10 transition" />
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Kasus Aktif</span>
@@ -89,7 +89,7 @@ export default function Dashboard({ auth, operations = [], averageReadinessScore
                     </div>
 
                     {/* Card 2: Red Notices */}
-                    <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-red-500/60 transition group relative overflow-hidden">
+                    <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-red-500/60 transition group relative overflow-hidden animate-stagger-2 hover:-translate-y-1 duration-300">
                         <div className="absolute top-0 right-0 h-16 w-16 bg-red-500/5 rounded-bl-full flex items-center justify-center group-hover:bg-red-500/10 transition" />
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Red Notices</span>
@@ -102,7 +102,7 @@ export default function Dashboard({ auth, operations = [], averageReadinessScore
                     </div>
 
                     {/* Card 3: Menunggu Persetujuan */}
-                    <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-yellow-500/60 transition group relative overflow-hidden">
+                    <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-yellow-500/60 transition group relative overflow-hidden animate-stagger-3 hover:-translate-y-1 duration-300">
                         <div className="absolute top-0 right-0 h-16 w-16 bg-yellow-500/5 rounded-bl-full flex items-center justify-center group-hover:bg-yellow-500/10 transition" />
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Menunggu Persetujuan</span>
@@ -115,7 +115,7 @@ export default function Dashboard({ auth, operations = [], averageReadinessScore
                     </div>
 
                     {/* Card 4: Skor Kesiapan (Real Aggregate) */}
-                    <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-emerald-500/60 transition group relative overflow-hidden">
+                    <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-emerald-500/60 transition group relative overflow-hidden animate-stagger-4 hover:-translate-y-1 duration-300">
                         <div className="absolute top-0 right-0 h-16 w-16 bg-emerald-500/5 rounded-bl-full flex items-center justify-center group-hover:bg-emerald-500/10 transition" />
                         <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Skor Kesiapan</span>
@@ -131,11 +131,11 @@ export default function Dashboard({ auth, operations = [], averageReadinessScore
                 {/* TABLE & RISK REGIONAL SIDEBAR GRID */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* LEFT TABLE: Operasi Prioritas Tinggi */}
-                    <div className="lg:col-span-2 bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6">
+                    <div className="lg:col-span-2 bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 animate-fade-in-up">
                         <div className="flex items-center justify-between mb-6">
                             <div>
                                 <h3 className="text-lg font-bold text-white">Operasi Prioritas Tinggi</h3>
-                                <p className="text-xs text-gray-400">Daftar kasus operasi aktif DivHubInter</p>
+                                <p className="text-xs text-gray-400">Daftar kasus operasi aktif OCMS</p>
                             </div>
                             <div className="flex items-center gap-3">
                                 {isAdmin && (
