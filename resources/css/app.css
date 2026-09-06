@@ -1,3 +1,230 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+    /* Lightweight Micro-Animations & Page Transitions (Pure CSS 60FPS) */
+    .animate-fade-in {
+        animation: fadeIn 0.35s ease-out forwards;
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .animate-scale-in {
+        animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .animate-float {
+        animation: float 4s ease-in-out infinite;
+    }
+
+    .animate-stagger-1 { animation: staggerFadeUp 0.45s cubic-bezier(0.16,1,0.3,1) 0.05s both; }
+    .animate-stagger-2 { animation: staggerFadeUp 0.45s cubic-bezier(0.16,1,0.3,1) 0.12s both; }
+    .animate-stagger-3 { animation: staggerFadeUp 0.45s cubic-bezier(0.16,1,0.3,1) 0.19s both; }
+    .animate-stagger-4 { animation: staggerFadeUp 0.45s cubic-bezier(0.16,1,0.3,1) 0.26s both; }
+
+    .animate-btn-shimmer {
+        position: relative;
+        overflow: hidden;
+    }
+    .animate-btn-shimmer::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.18) 50%, transparent 65%);
+        background-size: 200% 100%;
+        animation: btnShimmer 3.5s ease-in-out 1.5s infinite;
+    }
+
+    .animate-success-modal {
+        animation: successModalIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .animate-success-backdrop {
+        animation: successBackdrop 0.4s ease-out forwards;
+    }
+
+    .animate-check-ring {
+        animation: checkRingExpand 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+    }
+
+    .animate-check-draw {
+        animation: checkDraw 0.4s ease-out 0.45s both;
+        stroke-dasharray: 30;
+        stroke-dashoffset: 30;
+    }
+
+    .animate-success-glow {
+        animation: successGlowPulse 2.5s ease-in-out 0.6s infinite;
+    }
+
+    .animate-ripple {
+        animation: rippleOut 1.2s ease-out 0.3s infinite;
+    }
+
+    .animate-shake {
+        animation: shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    .animate-slide-down {
+        animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Skeleton Loading Shimmer Effect */
+    .skeleton-box {
+        position: relative;
+        overflow: hidden;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 0.5rem;
+    }
+
+    .skeleton-box::after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        transform: translateX(-100%);
+        background-image: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0,
+            rgba(212, 175, 55, 0.12) 30%,
+            rgba(255, 255, 255, 0.18) 50%,
+            rgba(212, 175, 55, 0.12) 70%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        animation: shimmer 1.8s infinite;
+        content: '';
+    }
+
+    /* Command Center Glow & Elevation Hover Effects */
+    .gold-glow-hover {
+        transition: all 0.3s ease;
+    }
+    .gold-glow-hover:hover {
+        border-color: rgba(212, 175, 55, 0.5) !important;
+        box-shadow: 0 0 18px rgba(212, 175, 55, 0.25);
+        transform: translateY(-2px);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes shake {
+    10%, 90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+    20%, 80% {
+        transform: translate3d(2px, 0, 0);
+    }
+    30%, 50%, 70% {
+        transform: translate3d(-4px, 0, 0);
+    }
+    40%, 60% {
+        transform: translate3d(4px, 0, 0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-6px); }
+}
+
+@keyframes staggerFadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes btnShimmer {
+    0%   { background-position: 200% center; }
+    100% { background-position: -200% center; }
+}
+
+@keyframes successBackdrop {
+    from { opacity: 0; backdrop-filter: blur(0px); }
+    to   { opacity: 1; backdrop-filter: blur(16px); }
+}
+
+@keyframes successModalIn {
+    from {
+        opacity: 0;
+        transform: scale(0.88) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes checkRingExpand {
+    from {
+        opacity: 0;
+        transform: scale(0.4);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes checkDraw {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes successGlowPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(16,185,129,0.25), 0 0 50px rgba(16,185,129,0.08); }
+    50%       { box-shadow: 0 0 35px rgba(16,185,129,0.45), 0 0 80px rgba(16,185,129,0.18); }
+}
+
+@keyframes rippleOut {
+    0%   { transform: scale(1); opacity: 0.5; }
+    100% { transform: scale(2.2); opacity: 0; }
+}

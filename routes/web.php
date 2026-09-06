@@ -11,12 +11,7 @@ use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\DpoPersonController;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return auth()->check() ? redirect()->route('dashboard') : redirect()->route('login');
 });
 
 use App\Http\Controllers\DocumentController;
