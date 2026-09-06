@@ -105,7 +105,11 @@ class DocumentController extends Controller
 
         // Dispatch AI verification job (hanya untuk dokumen selain LAINNYA)
         if (!$isLainnya) {
-            VerifyUploadedDocumentJob::dispatch($document);
+            try {
+                VerifyUploadedDocumentJob::dispatchSync($document);
+            } catch (\Throwable $e) {
+                VerifyUploadedDocumentJob::dispatch($document);
+            }
         }
 
         $successMessage = $isLainnya
@@ -318,8 +322,15 @@ class DocumentController extends Controller
             }
         }
 
+        $operation = $document->operation;
+
         // Hapus record DB (cascade: versions, access_logs)
         $document->delete();
+
+        // Sync status checklist item (reset ke Not Started jika dokumen dihapus)
+        if ($operation) {
+            app(OperationController::class)->syncChecklistWithDocuments($operation);
+        }
 
         return redirect()->back()->with('success', "Dokumen \"{$title}\" berhasil dihapus dari repository.");
     }

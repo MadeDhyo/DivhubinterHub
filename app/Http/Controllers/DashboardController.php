@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Operation;
+use App\Models\DpoPerson;
+use App\Models\User;
 use App\Services\ReadinessService;
 
 class DashboardController extends Controller
@@ -24,6 +26,9 @@ class DashboardController extends Controller
         return Inertia::render('Dashboard', [
             'operations' => $operations,
             'averageReadinessScore' => $averageScore,
+            'dpoPersons' => DpoPerson::select('id', 'name', 'alias', 'status')->orderBy('name')->get(),
+            'users' => User::select('id', 'name', 'role')->orderBy('name')->get(),
         ]);
     }
 }
+

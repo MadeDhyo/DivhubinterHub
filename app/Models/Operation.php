@@ -22,4 +22,10 @@ class Operation extends Model
     {
         return $this->hasMany(Document::class);
     }
+
+    public function dpoPersons()
+    {
+        return $this->belongsToMany(DpoPerson::class, 'dpo_person_operation')
+                    ->withTimestamps();
+    }
 }

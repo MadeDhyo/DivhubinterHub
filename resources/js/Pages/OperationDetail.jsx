@@ -79,6 +79,10 @@ export default function OperationDetail({ auth, operation, readiness, auditLogs 
     const canDelete   = userRole === 'admin';
     const updateLabel = userRole === 'admin' ? '+ Versi Baru' : 'Update';
 
+    const dpoTargets    = operation.dpo_persons || operation.dpoPersons || [];
+    const legacyTargets = operation.targets || [];
+    const targetsList   = dpoTargets.length > 0 ? dpoTargets : legacyTargets;
+
     const getStatusBadgeClass = (status) => {
         const s = (status || '').toLowerCase();
         if (s === 'ready' || s === 'completed' || s === 'success' || s === 'aktif' || s === 'active')
@@ -150,10 +154,10 @@ export default function OperationDetail({ auth, operation, readiness, auditLogs 
                                 <svg className="h-5 w-5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" /></svg>
                                 Dashboard
                             </Link>
-                            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-white/5 hover:text-white font-medium text-sm transition text-left" onClick={() => alert('Daftar Pencarian Orang - Segera Hadir')}>
-                                <svg className="h-5 w-5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                            <Link href="/dpo" className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-white/5 hover:text-white font-medium text-sm transition text-left">
+                                <svg className="h-5 w-5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                                 Daftar Pencarian Orang
-                            </button>
+                            </Link>
                             <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/10 text-[#d4af37] border-l-4 border-[#d4af37] font-semibold text-sm">
                                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
                                 Manajemen Kasus
@@ -288,11 +292,13 @@ export default function OperationDetail({ auth, operation, readiness, auditLogs 
                                         </div>
                                         <div className="bg-black/20 border border-white/10 rounded-lg p-5 flex flex-col justify-between">
                                             <div className="flex justify-between items-start">
-                                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Related Target ID</span>
+                                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Subjek DPO Terkait</span>
                                                 <svg className="h-5 w-5 text-[#d4af37]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
                                             </div>
-                                            <p className="font-extrabold text-base text-white mt-4 font-mono">
-                                                {operation.targets && operation.targets.length > 0 ? (operation.targets[0].red_notice_ref || operation.targets[0].id) : 'No target assigned'}
+                                            <p className="font-extrabold text-base text-white mt-4 font-mono truncate">
+                                                {targetsList.length > 0 ? (
+                                                    targetsList.map(t => t.name).join(', ')
+                                                ) : 'Belum ada DPO'}
                                             </p>
                                         </div>
                                     </div>
@@ -301,15 +307,51 @@ export default function OperationDetail({ auth, operation, readiness, auditLogs 
 
                             {/* ── TAB: TARGET ── */}
                             {activeTab === 'target' && (
-                                <div>
-                                    <h3 className="text-lg font-bold text-[#d4af37] border-b border-white/10 pb-3 mb-4">Targets</h3>
-                                    {operation.targets.length > 0 ? operation.targets.map(target => (
-                                        <div key={target.id} className="mt-4 border border-white/10 p-5 rounded bg-[#001b3d]/50 grid grid-cols-1 md:grid-cols-3 gap-6">
-                                            <div><p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Name</p><p className="font-extrabold text-base text-white mt-1">{target.name}</p></div>
-                                            <div><p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Alias</p><p className="font-extrabold text-base text-white mt-1">{target.alias || '-'}</p></div>
-                                            <div><p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Red Notice Ref</p><p className="font-extrabold text-base text-white mt-1 font-mono">{target.red_notice_ref || '-'}</p></div>
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
+                                        <h3 className="text-lg font-bold text-[#d4af37]">Subjek DPO / Target Operasi</h3>
+                                        <span className="text-xs font-bold text-gray-400 bg-white/5 px-3 py-1 rounded-full border border-white/10">
+                                            Total: {targetsList.length} Subjek DPO
+                                        </span>
+                                    </div>
+
+                                    {targetsList.length > 0 ? (
+                                        <div className="grid grid-cols-1 gap-4">
+                                            {targetsList.map(target => (
+                                                <div key={target.id} className="border border-white/10 p-5 rounded-xl bg-[#001b3d]/50 hover:border-[#d4af37]/40 transition grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-center">
+                                                    <div>
+                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Nama Subjek DPO</p>
+                                                        <p className="font-extrabold text-base text-white mt-0.5">{target.name}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Alias / Panggilan</p>
+                                                        <p className="font-semibold text-sm text-gray-300 mt-0.5">{target.alias || '-'}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Red Notice Ref</p>
+                                                        <p className="font-bold text-sm text-[#d4af37] font-mono mt-0.5">{target.red_notice_ref || '-'}</p>
+                                                    </div>
+                                                    <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0">
+                                                        <span className={`px-2.5 py-1 rounded text-[9px] font-bold uppercase ${
+                                                            target.status === 'Captured' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                                            target.status === 'Deceased' ? 'bg-gray-500/10 text-gray-400 border border-gray-500/20' :
+                                                            target.status === 'Withdrawn' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                                                            'bg-red-500/10 text-red-400 border border-red-500/20'
+                                                        }`}>
+                                                            {target.status || 'Aktif'}
+                                                        </span>
+                                                        <Link href="/dpo" className="text-xs text-[#d4af37] hover:underline font-semibold flex items-center gap-1">
+                                                            Detail DPO &rarr;
+                                                        </Link>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
-                                    )) : <p className="mt-4 text-gray-400 text-sm">No targets assigned to this operation.</p>}
+                                    ) : (
+                                        <p className="mt-4 text-gray-400 text-sm bg-[#001b3d]/30 border border-white/10 p-6 rounded-xl text-center">
+                                            Belum ada subjek DPO yang terhubung dengan operasi ini.
+                                        </p>
+                                    )}
                                 </div>
                             )}
 
@@ -340,23 +382,7 @@ export default function OperationDetail({ auth, operation, readiness, auditLogs 
                                                                     {item.template_item?.is_critical && <span className="px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-red-500/10 text-red-400 border border-red-500/20 uppercase">CRITICAL</span>}
                                                                 </div>
                                                                 <div className="flex items-center gap-2">
-                                                                    <select
-                                                                        className="text-xs bg-[#031433] border border-white/10 text-white rounded-md px-2 py-1 focus:border-[#d4af37] focus:outline-none"
-                                                                        value={item.status}
-                                                                        onChange={(e) => handleStatusChange(item.id, e.target.value)}
-                                                                        disabled={userRole === 'staf' && (isVerified || isRejected)}
-                                                                    >
-                                                                        <option value="Not Started" disabled={userRole !== 'staf'}>Not Started</option>
-                                                                        <option value="In Progress" disabled={userRole !== 'staf'}>In Progress</option>
-                                                                        <option value="Completed"  disabled={userRole !== 'staf'}>Completed</option>
-                                                                        {(userRole === 'admin' || userRole === 'pimpinan' || isVerified || isRejected) && (
-                                                                            <>
-                                                                                <option value="Verified" disabled={userRole === 'staf'}>Verified</option>
-                                                                                <option value="Rejected" disabled={userRole === 'staf'}>Rejected</option>
-                                                                            </>
-                                                                        )}
-                                                                    </select>
-                                                                    <span className={`px-2.5 py-0.5 text-[10px] rounded-full font-bold uppercase tracking-wider ${
+                                                                    <span className={`px-3 py-1 text-xs rounded-full font-bold uppercase tracking-wider ${
                                                                         isVerified   ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
                                                                         item.status === 'Completed'  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
                                                                         item.status === 'In Progress'? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' :
@@ -366,47 +392,9 @@ export default function OperationDetail({ auth, operation, readiness, auditLogs 
                                                                 </div>
                                                             </div>
 
-                                                            {/* Row 2: AI Result */}
-                                                            {item.ai_validation_result && (
-                                                                <div className={`mt-3 rounded-lg p-3 border text-xs ${
-                                                                    aiResult?.status === 'VERIFIED' ? 'bg-blue-500/10 border-blue-500/30' :
-                                                                    aiResult?.status === 'REJECTED' ? 'bg-red-500/10 border-red-500/30' :
-                                                                    'bg-yellow-500/10 border-yellow-500/30'
-                                                                }`}>
-                                                                    <div className="flex items-center gap-2 mb-1">
-                                                                        <svg className="h-3.5 w-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                                                        <span className={`font-bold uppercase tracking-wider ${
-                                                                            aiResult?.status === 'VERIFIED' ? 'text-blue-400' :
-                                                                            aiResult?.status === 'REJECTED' ? 'text-red-400' : 'text-yellow-400'
-                                                                        }`}>AI Gemini — {aiResult?.status === 'VERIFIED' ? 'Terverifikasi' : aiResult?.status === 'REJECTED' ? 'Ditolak' : 'Dalam Proses'}</span>
-                                                                    </div>
-                                                                    {aiResult?.reason && <p className="text-gray-300 leading-relaxed">{aiResult.reason}</p>}
-                                                                    {!aiResult && <p className="text-gray-400">{item.ai_validation_result}</p>}
-                                                                </div>
-                                                            )}
 
-                                                            {/* Row 3: Alasan Penolakan */}
-                                                            {isRejected && (
-                                                                <div className="mt-3">
-                                                                    <label className="block text-[10px] font-bold text-red-400 uppercase tracking-wider mb-1">Alasan Penolakan Dokumen</label>
-                                                                    {userRole === 'staf' ? (
-                                                                        <p className="text-sm text-gray-300 bg-red-500/5 border border-red-500/20 rounded px-3 py-2">
-                                                                            {item.rejection_reason || <span className="text-gray-500 italic">Belum ada alasan yang diberikan.</span>}
-                                                                        </p>
-                                                                    ) : (
-                                                                        <textarea rows="2"
-                                                                            placeholder="Tuliskan alasan penolakan dokumen..."
-                                                                            defaultValue={item.rejection_reason || ''}
-                                                                            onBlur={(e) => {
-                                                                                if (e.target.value !== (item.rejection_reason || '')) {
-                                                                                    router.post(`/checklists/${item.id}/status`, { status: item.status, rejection_reason: e.target.value }, { preserveScroll: true });
-                                                                                }
-                                                                            }}
-                                                                            className="w-full text-xs bg-red-500/5 border border-red-500/20 text-white rounded-md px-3 py-2 focus:border-red-400 focus:outline-none placeholder-gray-600 resize-none"
-                                                                        />
-                                                                    )}
-                                                                </div>
-                                                            )}
+
+
                                                         </div>
                                                     );
                                                 })}

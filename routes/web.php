@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OperationController;
 use App\Http\Controllers\BusinessProcessController;
 use App\Http\Controllers\ChecklistController;
+use App\Http\Controllers\DpoPersonController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -29,6 +30,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
 
+    // DPO — semua user authenticated bisa melihat
+    Route::get('/dpo', [DpoPersonController::class, 'index'])->name('dpo.index');
+
     // Khusus Admin
     Route::middleware('can:admin-access')->group(function () {
         Route::get('/user-management', [\App\Http\Controllers\UserController::class, 'index'])->name('user-management.index');
@@ -38,6 +42,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/user-management/{id}', [\App\Http\Controllers\UserController::class, 'destroy'])->name('user-management.destroy');
 
         Route::get('/activity-logs', [\App\Http\Controllers\ActivityLogController::class, 'index'])->name('activity-logs.index');
+
+        // DPO CRUD (admin only)
+        Route::post('/dpo', [DpoPersonController::class, 'store'])->name('dpo.store');
+        Route::post('/dpo/{id}', [DpoPersonController::class, 'update'])->name('dpo.update');
+        Route::delete('/dpo/{id}', [DpoPersonController::class, 'destroy'])->name('dpo.destroy');
+
+        // Tambah Operasi (admin only)
+        Route::post('/operations', [OperationController::class, 'store'])->name('operations.store');
     });
     // Documents
     Route::post('/documents', [\App\Http\Controllers\DocumentController::class, 'store'])->name('documents.store');
@@ -55,4 +67,5 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/auth.php';
 
 Route::get('/business-processes', [BusinessProcessController::class, 'index']);
+
 

@@ -145,7 +145,7 @@ export default function UserManagement({ users }) {
 
                                 <button
                                     onClick={() => setIsAddModalOpen(true)}
-                                    className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-[#d4af37] to-yellow-600 text-[#001b3d] font-bold text-xs uppercase tracking-wider rounded-lg shadow hover:brightness-110 transition"
+                                    className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#d4af37] hover:bg-[#b5952f] text-[#001b3d] font-bold text-xs uppercase tracking-wider rounded-lg shadow-md hover:brightness-110 transition cursor-pointer"
                                 >
                                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
