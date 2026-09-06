@@ -29,18 +29,18 @@ export default function Login({ status, canResetPassword }) {
             <div className="w-full max-w-[450px] bg-[#031433]/85 border border-white/10 shadow-2xl rounded-2xl p-8 backdrop-blur-md relative z-10 overflow-hidden border-t-4 border-t-[#d4af37]">
 
                 {/* Logo Section */}
-                <div className="flex flex-col items-center mb-8">
+                <div className="flex flex-col items-center mb-6">
                     <img
                         src="/images/INTERPOL_Logo.png"
-                        alt="Logo INTERPOL OCMS"
-                        className="h-24 w-auto object-contain mb-3 drop-shadow-[0_4px_12px_rgba(212,175,55,0.2)]"
+                        alt="INTERPOL Logo"
+                        className="h-16 w-auto object-contain mb-1.5 drop-shadow-md"
                         onError={(e) => {
                             e.target.onerror = null;
                             e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23d4af37'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 009 11c0-3.517 1.009-6.799 2.753-9.571m-3.44 2.04A13.916 13.916 0 009 11c0 3.517 1.009 6.799 2.753 9.571m3 0c1.744-2.772 2.753-6.054 2.753-9.571 0-3.517-1.009-6.799-2.753-9.571m-3 0c-1.744 2.772-2.753 6.054-2.753 9.571'/%3E%3C/svg%3E";
                         }}
                     />
-                    <h1 className="text-xl font-black tracking-wider text-white">OCMS</h1>
-                    <p className="text-[11px] font-bold text-[#d4af37] tracking-widest mt-0.5">NCB INTERPOL INDONESIA</p>
+                    <h1 className="text-base font-black tracking-widest text-[#d4af37]">OCMS</h1>
+                    <p className="text-[10px] text-gray-400 font-semibold tracking-wider">Operation Case Management System</p>
                 </div>
 
                 {status && (

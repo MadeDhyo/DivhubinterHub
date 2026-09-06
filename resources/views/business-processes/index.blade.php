@@ -72,7 +72,7 @@
     <h1>Business Processes</h1>
 
     <p class="subtitle">
-        Daftar proses bisnis Divhubinter
+        Daftar proses bisnis OCMS NCB INTERPOL
     </p>
 
     @if ($businessProcesses->count())
