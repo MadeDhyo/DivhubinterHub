@@ -88,4 +88,15 @@ class EncryptedDocumentService
 
         return $rawContent;
     }
+
+    /**
+     * Hapus file fisik dari disk secure_docs
+     */
+    public function deleteFile(string $targetPath): void
+    {
+        $fullPath = 'secure_docs/' . $targetPath;
+        if (Storage::disk('local')->exists($fullPath)) {
+            Storage::disk('local')->delete($fullPath);
+        }
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\VerifyUploadedDocumentJob;
 use App\Models\Document;
 use App\Models\DocumentVersion;
 use App\Models\DocumentAccessLog;
@@ -27,13 +28,13 @@ class DocumentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'operation_id' => 'required|exists:operations,id',
-            'title' => 'required|string|max:255',
-            'document_type' => 'required|string|max:100',
+            'operation_id'         => 'required|exists:operations,id',
+            'title'                => 'required|string|max:255',
+            'document_type'        => 'required|in:IDENTIFIKASI_PROFIL,CEK_STATUS_RED_NOTICE,SURAT_TUGAS,LAINNYA',
             'classification_level' => 'required|in:SANGAT_RAHASIA,RAHASIA,TERBATAS,BIASA',
-            'source_agency' => 'required|string|max:150',
-            'file' => 'required|file|max:51200', // 50MB max
-            'retention_until' => 'nullable|date',
+            'source_agency'        => 'required|string|max:150',
+            'file'                 => 'required|file|max:51200', // 50MB max
+            'retention_until'      => 'nullable|date',
         ]);
 
         $user = Auth::user();
@@ -55,16 +56,19 @@ class DocumentController extends Controller
         // Generate Unique Document Number: DOC-NCB-YYYYMMDD-XXXX
         $documentNumber = sprintf('DOC-NCB-%s-%s', now()->format('Ymd'), strtoupper(Str::random(4)));
 
+        $isLainnya = ($request->document_type === 'LAINNYA');
+
         $document = Document::create([
-            'operation_id' => $request->operation_id,
-            'document_number' => $documentNumber,
-            'title' => $request->title,
-            'document_type' => $request->document_type,
-            'classification_level' => $request->classification_level,
-            'source_agency' => $request->source_agency,
-            'current_version' => 1,
-            'uploaded_by' => $user->id,
-            'retention_until' => $request->retention_until,
+            'operation_id'           => $request->operation_id,
+            'document_number'        => $documentNumber,
+            'title'                  => $request->title,
+            'document_type'          => $request->document_type,
+            'classification_level'   => $request->classification_level,
+            'source_agency'          => $request->source_agency,
+            'current_version'        => 1,
+            'uploaded_by'            => $user->id,
+            'retention_until'        => $request->retention_until,
+            'ai_verification_status' => $isLainnya ? 'SKIPPED' : 'PENDING',
         ]);
 
         $version = DocumentVersion::create([
@@ -99,7 +103,20 @@ class DocumentController extends Controller
             'status' => 'SUCCESS',
         ]);
 
-        return redirect()->back()->with('success', 'Dokumen berhasil diunggah dengan enkripsi dan verifikasi SHA-256.');
+        // Dispatch AI verification job (hanya untuk dokumen selain LAINNYA)
+        if (!$isLainnya) {
+            try {
+                VerifyUploadedDocumentJob::dispatchSync($document);
+            } catch (\Throwable $e) {
+                VerifyUploadedDocumentJob::dispatch($document);
+            }
+        }
+
+        $successMessage = $isLainnya
+            ? 'Dokumen berhasil diunggah dan disimpan di repository.'
+            : 'Dokumen berhasil diunggah. Verifikasi AI sedang berjalan di latar belakang.';
+
+        return redirect()->back()->with('success', $successMessage);
     }
 
     /**
@@ -269,5 +286,52 @@ class DocumentController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 422);
         }
+    }
+
+    /**
+     * Delete a document and all its versions (physical files + DB records).
+     * Hanya pengunggah atau admin yang boleh menghapus.
+     */
+    public function destroy(Request $request, $id)
+    {
+        $document = Document::with('versions')->findOrFail($id);
+        $user     = Auth::user();
+
+        // Otorisasi: hanya pengunggah atau admin
+        if ($document->uploaded_by !== $user->id && $user->role !== 'admin') {
+            return redirect()->back()->with('error', 'Akses ditolak: Hanya pengunggah atau Admin yang dapat menghapus dokumen ini.');
+        }
+
+        $title = $document->title;
+
+        // Catat audit sebelum dihapus
+        AuditTrailService::log(
+            module: 'DOCUMENT',
+            actionType: 'DELETE',
+            entityName: 'Document',
+            entityId: $document->id,
+            beforeState: $document->toArray()
+        );
+
+        // Hapus semua file fisik di disk secure_docs
+        foreach ($document->versions as $version) {
+            try {
+                $this->docService->deleteFile($version->file_path);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("[DocDelete] Gagal hapus file fisik: {$version->file_path} — " . $e->getMessage());
+            }
+        }
+
+        $operation = $document->operation;
+
+        // Hapus record DB (cascade: versions, access_logs)
+        $document->delete();
+
+        // Sync status checklist item (reset ke Not Started jika dokumen dihapus)
+        if ($operation) {
+            app(OperationController::class)->syncChecklistWithDocuments($operation);
+        }
+
+        return redirect()->back()->with('success', "Dokumen \"{$title}\" berhasil dihapus dari repository.");
     }
 }

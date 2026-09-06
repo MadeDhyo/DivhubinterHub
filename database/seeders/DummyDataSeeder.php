@@ -13,30 +13,24 @@ class DummyDataSeeder extends Seeder
     public function run(): void
     {
         $admin = \App\Models\User::factory()->create([
-            'name' => 'Pimpinan Admin',
+            'name' => 'Super Admin',
             'email' => 'admin@ocms.local',
-            'nip' => '198001012005011001',
+            'password' => bcrypt('password'),
             'role' => 'admin',
-            'classification_clearance' => 'SANGAT_RAHASIA',
-            'password' => bcrypt('password'),
         ]);
 
-        $user = \App\Models\User::factory()->create([
-            'name' => 'Kombes Pol Ardy (Pimpinan)',
+        $pimpinan = \App\Models\User::factory()->create([
+            'name' => 'Kasubbag Pimpinan',
             'email' => 'pimpinan@ocms.local',
-            'nip' => '198501152010121001',
-            'role' => 'approver',
-            'classification_clearance' => 'SANGAT_RAHASIA',
             'password' => bcrypt('password'),
+            'role' => 'pimpinan',
         ]);
 
-        $officer = \App\Models\User::factory()->create([
-            'name' => 'Bripka Susanto (Case Officer)',
-            'email' => 'officer@ocms.local',
-            'nip' => '199203102015031002',
-            'role' => 'case_officer',
-            'classification_clearance' => 'RAHASIA',
+        $staf = \App\Models\User::factory()->create([
+            'name' => 'Staff Anggota',
+            'email' => 'staf@ocms.local',
             'password' => bcrypt('password'),
+            'role' => 'staf',
         ]);
 
         $template = \App\Models\ChecklistTemplate::create([
@@ -52,10 +46,10 @@ class DummyDataSeeder extends Seeder
 
         $operation = \App\Models\Operation::create([
             'operation_number' => 'OP-2026-001',
-            'name' => 'Operation Fugitive Alpha',
+            'name' => 'Operation Alpha',
             'status' => 'Verification',
             'priority' => 'High',
-            'pic_id' => $user->id,
+            'pic_id' => $pimpinan->id,
         ]);
 
         \App\Models\Target::create([
@@ -76,49 +70,9 @@ class DummyDataSeeder extends Seeder
                 'operation_checklist_id' => $opChecklist->id,
                 'checklist_template_item_id' => $item->id,
                 'status' => 'Not Started',
+                'pic_id' => $staf->id,
+                'reviewer_id' => $pimpinan->id,
             ]);
         }
-
-        // Seed Sample Encrypted Document Metadata
-        $doc = \App\Models\Document::create([
-            'operation_id' => $operation->id,
-            'document_number' => 'DOC-NCB-20260815-RED1',
-            'title' => 'Red Notice Official Interpol Control A-1234/1-2026',
-            'document_type' => 'RED_NOTICE',
-            'classification_level' => 'RAHASIA',
-            'source_agency' => 'Interpol General Secretariat Lyon',
-            'current_version' => 1,
-            'uploaded_by' => $officer->id,
-        ]);
-
-        \App\Models\DocumentVersion::create([
-            'document_id' => $doc->id,
-            'version_number' => 1,
-            'original_filename' => 'Red_Notice_Control_A1234.pdf',
-            'storage_disk' => 'secure_docs',
-            'file_path' => 'operation_1/2026/08/sample_red_notice.pdf',
-            'file_size_bytes' => 1048576,
-            'mime_type' => 'application/pdf',
-            'checksum_sha256' => hash('sha256', 'SAMPLE_PDF_CONTENT_INTERPOL_RED_NOTICE'),
-            'change_description' => 'Initial ingestion of official Red Notice document',
-            'uploaded_by' => $officer->id,
-        ]);
-
-        // Seed Initial Audit Log with Hash Chain
-        \App\Services\AuditTrailService::log(
-            module: 'OPERATION',
-            actionType: 'CREATE',
-            entityName: 'Operation',
-            entityId: $operation->id,
-            afterState: ['operation_number' => $operation->operation_number, 'name' => $operation->name]
-        );
-
-        \App\Services\AuditTrailService::log(
-            module: 'DOCUMENT',
-            actionType: 'CREATE',
-            entityName: 'Document',
-            entityId: $doc->id,
-            afterState: ['document_number' => $doc->document_number, 'classification' => $doc->classification_level]
-        );
     }
 }

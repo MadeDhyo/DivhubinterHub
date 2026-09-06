@@ -18,14 +18,18 @@ class LanAccessMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // TEMPORARILY DISABLED — buka akses dari semua jaringan
+        return $next($request);
+
+        /*
         $allowedSubnets = config('security.allowed_ip_subnets', [
-            '192.168.80.0/24',
+            '10.0.0.0/8',
+            '172.16.0.0/12',
+            '192.168.0.0/16',
         ]);
 
         $clientIp = $request->ip();
 
-        // If client connects via loopback (localhost), we need to check
-        // whether this machine's actual network IP is in the allowed subnet.
         if ($this->isLoopback($clientIp)) {
             $machineIps = $this->getMachineNetworkIps();
 
@@ -45,13 +49,13 @@ class LanAccessMiddleware
             return $next($request);
         }
 
-        // For remote clients, check their IP directly
         if (!$this->isIpAllowed($clientIp, $allowedSubnets)) {
             $this->logBlockedAccess($clientIp, $allowedSubnets);
             abort(403, 'AKSES DITOLAK: Akses hanya diizinkan melalui jaringan LAN resmi NCB Interpol.');
         }
 
         return $next($request);
+        */
     }
 
     /**

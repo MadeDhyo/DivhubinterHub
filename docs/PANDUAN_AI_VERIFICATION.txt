@@ -1,0 +1,199 @@
+======================================================
+  PANDUAN FITUR AI VERIFIKASI DOKUMEN CHECKLIST
+======================================================
+
+APA INI?
+--------
+Fitur baru yang menggunakan Google Gemini AI untuk memverifikasi dokumen secara otomatis pada checklist operasi. Saat berkas diunggah untuk sebuah item checklist, AI akan menganalisis dokumen tersebut dan menentukan apakah sudah sesuai kriteria atau belum.
+
+Hasil Otomatis dari AI:
+- Verified  -> Dokumen sesuai kriteria (nama jelas, nomor identitas terbaca, dll)
+- Rejected  -> Dokumen tidak sesuai + alasan penolakan dari AI
+
+
+CARA KERJA (ALUR SINGKAT)
+--------------------------
+User Upload Dokumen
+    |
+    v
+File Tersimpan di Server
+    |
+    v
+Background Job Otomatis Jalan
+    |
+    v
+Dokumen Dikirim ke Google Gemini AI
+    |
+    v
+AI Menganalisis Dokumen
+    |
+    v
+Status Checklist Auto-Update (Verified / Rejected)
+    |
+    v
+Alasan AI Tersimpan di Database
+
+
+======================================================
+  SETUP AWAL (WAJIB DILAKUKAN SEKALI)
+======================================================
+
+1. PULL BRANCH TERBARU
+   git pull origin feature/role-testing
+
+2. INSTALL DEPENDENCIES & MIGRASI DATABASE
+   composer install
+   npm install
+   php artisan migrate
+
+3. ISI API KEY GEMINI DI .env
+   Buka file .env, cari bagian paling bawah, isi:
+   GEMINI_API_KEY=isi_api_key_gemini_kamu_disini
+
+   Cara Dapat API Key Gemini (Gratis):
+   a. Buka https://aistudio.google.com/app/apikey
+   b. Login dengan akun Gmail pribadi
+   c. Klik "Create API key" -> "Create API key in new project"
+   d. Copy kunci yang muncul dan paste ke .env
+
+4. BUILD FRONTEND
+   npm run build
+
+
+======================================================
+  INTEGRASI KE FITUR UPLOAD (UNTUK DEVELOPER UPLOAD)
+======================================================
+
+Setelah setup selesai, tambahkan 1 BARIS KODE di controller upload kamu.
+
+Tepat SETELAH file berhasil disimpan dan attachment_path di-update, tambahkan:
+
+    \App\Jobs\VerifyChecklistDocumentJob::dispatch($item);
+
+Contoh Penerapan:
+
+    // Kode upload kamu yang sudah ada
+    $path = $file->store('checklists/attachments', 'public');
+    $item->update([
+        'attachment_path' => $path,
+        'status' => 'In Progress',
+    ]);
+
+    // === TAMBAHKAN BARIS INI ===
+    \App\Jobs\VerifyChecklistDocumentJob::dispatch($item);
+    // ============================
+
+PENTING: Variabel $item harus bertipe App\Models\OperationChecklistItem.
+
+
+======================================================
+  MENJALANKAN QUEUE WORKER
+======================================================
+
+Agar background job AI bisa berjalan, queue worker harus aktif.
+Buka terminal terpisah dan jalankan:
+
+    php artisan queue:work
+
+Biarkan terminal ini tetap terbuka selama development.
+Queue worker ini yang memproses verifikasi AI di belakang layar.
+
+
+======================================================
+  TESTING MANUAL (TANPA UI UPLOAD)
+======================================================
+
+Tersedia Artisan Command untuk testing tanpa perlu klik-klik di website:
+
+LANGKAH 1 - Siapkan File Test
+   Taruh file gambar/PDF ke folder:
+   storage/app/public/checklists/attachments/
+   Contoh: copy foto KTP dan rename jadi test_dokumen.jpg
+
+LANGKAH 2 - Update Database
+   Buka phpMyAdmin -> tabel operation_checklist_items -> Edit salah satu item:
+   - Set attachment_path = checklists/attachments/test_dokumen.jpg
+   - Set status = In Progress
+
+LANGKAH 3 - Jalankan Command
+   php artisan test:ai-verify 1 --sync
+   (ganti angka 1 dengan ID item yang mau ditest)
+
+LANGKAH 4 - Lihat Hasil
+   Buka phpMyAdmin -> tabel operation_checklist_items:
+   - Kolom status -> Berubah jadi Verified atau Rejected
+   - Kolom ai_validation_result -> Alasan dari AI
+
+
+======================================================
+  PROMPT AI YANG SUDAH DIKONFIGURASI
+======================================================
+
+Setiap jenis checklist punya instruksi berbeda untuk AI.
+Prompt disimpan di kolom ai_validation_prompt pada tabel checklist_template_items:
+
+1. Identifikasi Profil
+   -> Cek dokumen identitas resmi (KTP/Paspor/SIM), nama terbaca, nomor identitas ada, foto wajah jelas
+
+2. Cek Status Red Notice
+   -> Cek referensi nomor Red Notice/Interpol, nama subjek, berasal dari instansi resmi
+
+3. Koordinasi Negara Asal
+   -> Cek kop surat instansi, referensi nama/nomor kasus, ada tanda tangan/stempel
+
+Prompt bisa diubah langsung via phpMyAdmin di tabel checklist_template_items kolom ai_validation_prompt.
+
+
+======================================================
+  SKENARIO TESTING
+======================================================
+
+Foto formal biasa (pasfoto 3x4)     -> Rejected (bukan dokumen identitas)
+KTP asli (scan/foto KTP)            -> Verified (dokumen identitas valid)
+Paspor (scan halaman depan)         -> Verified (ada nomor & nama)
+Dokumen random (surat undangan)     -> Rejected (bukan dokumen identitas)
+File buram (foto blur/gelap)        -> Rejected (tidak terbaca jelas)
+
+
+======================================================
+  STRUKTUR FILE BARU
+======================================================
+
+app/
+  Console/Commands/
+    TestAiVerify.php              <- Command testing manual
+  Jobs/
+    VerifyChecklistDocumentJob.php <- Background job verifikasi AI
+  Services/
+    GeminiVerificationService.php  <- Core service komunikasi ke Gemini API
+
+config/
+  services.php                     <- Ditambah konfigurasi Gemini
+
+database/migrations/
+  2026_08_24_..._add_ai_validation_columns_to_checklist_tables.php
+
+
+======================================================
+  TROUBLESHOOTING
+======================================================
+
+Error "GEMINI_API_KEY belum diatur"
+-> Isi GEMINI_API_KEY di file .env
+
+Error "HTTP 401"
+-> API Key salah atau belum aktif. Buat ulang di https://aistudio.google.com/app/apikey
+
+Error "HTTP 404 model not found"
+-> Jalankan: php artisan config:clear
+
+Status tidak berubah setelah upload
+-> Pastikan php artisan queue:work sedang berjalan di terminal terpisah
+
+File tidak ditemukan
+-> Pastikan file ada di storage/app/public/ dan attachment_path benar
+
+
+======================================================
+Kalau ada pertanyaan atau error, hubungi Ivander :)
+======================================================
