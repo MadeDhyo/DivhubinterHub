@@ -29,20 +29,20 @@ export default function Dashboard({ auth, operations = [] }) {
                     isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
                 }`}>
                     <div className="space-y-8">
-                        {/* Logo DivHubInter */}
+                        {/* Logo OCMS INTERPOL */}
                         <div className="flex items-center gap-3 border-b border-white/10 pb-6">
                             <img
-                                src="/images/logo.png"
-                                alt="Logo DivHubInter"
-                                className="h-16 w-auto object-contain"
+                                src="/images/INTERPOL_Logo.png"
+                                alt="Logo INTERPOL"
+                                className="h-12 w-auto object-contain"
                                 onError={(e) => {
                                     e.target.onerror = null;
                                     e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23d4af37'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 009 11c0-3.517 1.009-6.799 2.753-9.571m-3.44 2.04A13.916 13.916 0 009 11c0 3.517 1.009 6.799 2.753 9.571m3 0c1.744-2.772 2.753-6.054 2.753-9.571 0-3.517-1.009-6.799-2.753-9.571m-3 0c-1.744 2.772-2.753 6.054-2.753 9.571'/%3E%3C/svg%3E";
                                 }}
                             />
                             <div>
-                                <h1 className="text-sm font-extrabold tracking-wider text-white">DIVHUBINTER</h1>
-                                <p className="text-xs font-bold text-[#d4af37] tracking-widest">POLRI</p>
+                                <h1 className="text-sm font-extrabold tracking-wider text-white">OCMS</h1>
+                                <p className="text-[10px] font-bold text-[#d4af37] tracking-widest">NCB INTERPOL</p>
                             </div>
                         </div>
 
@@ -229,7 +229,7 @@ export default function Dashboard({ auth, operations = [] }) {
                                 <div className="flex items-center justify-between mb-6">
                                     <div>
                                         <h3 className="text-lg font-bold text-white">Operasi Prioritas Tinggi</h3>
-                                        <p className="text-xs text-gray-400">Daftar kasus operasi aktif DivHubInter</p>
+                                        <p className="text-xs text-gray-400">Daftar kasus operasi aktif OCMS</p>
                                     </div>
                                     <button
                                         onClick={() => alert('Fitur Lihat Semua Kasus segera tersedia.')}

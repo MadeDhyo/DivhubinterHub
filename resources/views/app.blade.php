@@ -4,10 +4,10 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title inertia>{{ config('app.name', 'DIVHUBINTER POLRI') }}</title>
+        <title inertia>{{ config('app.name', 'OCMS - NCB INTERPOL') }}</title>
 
         <!-- Favicon -->
-        <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+        <link rel="icon" type="image/png" href="{{ asset('images/INTERPOL_Logo.png') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
