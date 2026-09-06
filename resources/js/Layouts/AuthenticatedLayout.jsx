@@ -12,6 +12,9 @@ export default function AuthenticatedLayout({ children }) {
 
     return (
         <div className="min-h-screen bg-[#001b3d] font-sans text-white flex flex-col justify-between">
+            {/* Top Accent Line */}
+            <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-gradient-to-r from-yellow-600 via-[#d4af37] to-amber-300 animate-pulse shadow-[0_0_10px_#d4af37]" />
+
             <div className="flex flex-1 relative">
                 {/* 1. SIDEBAR KIRI (Desktop & Mobile) */}
                 <aside className={`fixed top-0 bottom-0 left-0 z-40 w-64 bg-[#031433]/85 backdrop-blur-md border-r border-white/10 flex flex-col justify-between p-6 transition-transform duration-300 md:translate-x-0 ${
@@ -23,10 +26,10 @@ export default function AuthenticatedLayout({ children }) {
                             <img
                                 src="/images/INTERPOL_Logo.png"
                                 alt="Logo INTERPOL"
-                                className="h-10 w-auto object-contain"
+                                className="h-10 w-auto object-contain drop-shadow-[0_0_8px_rgba(212,175,55,0.3)] transition-transform duration-300 hover:scale-105"
                                 onError={(e) => {
                                     e.target.onerror = null;
-                                    e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23d4af37'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 009 11c0-3.517 1.009-6.799 2.753-9.571m-3.44 2.04A13.916 13.916 0 009 11c0 3.517 1.009-6.799 2.753 9.571m3 0c1.744-2.772 2.753-6.054 2.753-9.571 0-3.517-1.009-6.799-2.753-9.571m-3 0c-1.744 2.772-2.753 6.054-2.753 9.571'/%3E%3C/svg%3E";
+                                    e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23d4af37'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 009 11c0-3.517 1.009-6.799 2.753-9.571m-3.44 2.04A13.916 13.916 0 009 11c0-3.517 1.009-6.799 2.753-9.571m3 0c1.744-2.772 2.753-6.054 2.753-9.571m-3 0c-1.744 2.772-2.753 6.054-2.753 9.571'/%3E%3C/svg%3E";
                                 }}
                             />
                             <div>
@@ -39,7 +42,7 @@ export default function AuthenticatedLayout({ children }) {
                         <nav className="space-y-2">
                             <Link
                                 href={route('dashboard')}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-lg font-semibold text-sm transition ${
+                                className={`flex items-center gap-3 px-4 py-3 rounded-lg font-semibold text-sm transition gold-glow-hover ${
                                     route().current('dashboard')
                                         ? 'bg-white/10 text-[#d4af37] border-l-4 border-[#d4af37]'
                                         : 'text-gray-300 hover:bg-white/5 hover:text-white'
@@ -53,7 +56,7 @@ export default function AuthenticatedLayout({ children }) {
 
                             <Link
                                 href={route('dpo.index')}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-lg font-semibold text-sm transition ${
+                                className={`flex items-center gap-3 px-4 py-3 rounded-lg font-semibold text-sm transition gold-glow-hover ${
                                     route().current('dpo.index')
                                         ? 'bg-white/10 text-[#d4af37] border-l-4 border-[#d4af37]'
                                         : 'text-gray-300 hover:bg-white/5 hover:text-white'
@@ -124,7 +127,7 @@ export default function AuthenticatedLayout({ children }) {
                 {/* Overlay for mobile sidebar */}
                 {isMobileSidebarOpen && (
                     <div
-                        className="fixed inset-0 z-30 bg-black/60 md:hidden"
+                        className="fixed inset-0 z-30 bg-black/60 md:hidden animate-fade-in"
                         onClick={() => setIsMobileSidebarOpen(false)}
                     />
                 )}
@@ -135,7 +138,7 @@ export default function AuthenticatedLayout({ children }) {
                     <header className="h-20 border-b border-white/10 bg-[#031433]/40 backdrop-blur-md px-6 md:px-8 flex items-center justify-between sticky top-0 z-20">
                         {/* Mobile Toggle Menu */}
                         <button
-                            className="md:hidden p-2 hover:bg-white/5 rounded text-gray-300"
+                            className="md:hidden p-2 hover:bg-white/5 rounded text-gray-300 transition"
                             onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
                         >
                             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -154,7 +157,7 @@ export default function AuthenticatedLayout({ children }) {
                                 <input
                                     type="text"
                                     placeholder="Cari kasus, subjek, atau referensi..."
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] transition"
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] transition duration-300"
                                 />
                             </div>
                         </div>
@@ -170,7 +173,7 @@ export default function AuthenticatedLayout({ children }) {
                                         Role: {user.role}
                                     </p>
                                 </div>
-                                <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-[#d4af37] to-yellow-600 flex items-center justify-center font-extrabold text-sm text-[#001b3d] shadow-md border border-white/20 select-none">
+                                <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-[#d4af37] to-yellow-600 flex items-center justify-center font-extrabold text-sm text-[#001b3d] shadow-md border border-white/20 select-none transition-transform hover:scale-105">
                                     {getUserInitials(user.name)}
                                 </div>
                                 <Link
@@ -189,7 +192,7 @@ export default function AuthenticatedLayout({ children }) {
                     </header>
 
                     {/* MAIN CONTENT */}
-                    <main className="flex-1 p-6 md:p-8">
+                    <main className="flex-1 p-6 md:p-8 animate-fade-in-up">
                         {children}
                     </main>
                 </div>

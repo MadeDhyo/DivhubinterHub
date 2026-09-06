@@ -1,10 +1,19 @@
+import DetailSkeleton from '@/Components/Skeleton/DetailSkeleton';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import NotificationDropdown from '@/Components/NotificationDropdown';
 
 export default function OperationDetail({ auth, operation, readiness, auditLogs = [], flash = {} }) {
     const [activeTab, setActiveTab] = useState('overview');
+    const [isLoading, setIsLoading] = useState(true);
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 400);
+        return () => clearTimeout(timer);
+    }, []);
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [showVersionModal, setShowVersionModal] = useState(false);
     const [selectedDoc, setSelectedDoc] = useState(null);
@@ -212,90 +221,96 @@ export default function OperationDetail({ auth, operation, readiness, auditLogs 
                     </header>
 
                     <main className="flex-1 p-6 md:p-8">
-                        {/* Flash */}
-                        {flash?.success && <div className="mb-4 p-4 bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-300 text-sm rounded">{flash.success}</div>}
-                        {flash?.error   && <div className="mb-4 p-4 bg-red-500/10 border-l-4 border-red-500 text-red-300 text-sm rounded">{flash.error}</div>}
+                        {isLoading ? (
+                            <DetailSkeleton />
+                        ) : (
+                            <div className="space-y-6 animate-fade-in-up">
+                                {/* Flash */}
+                                {flash?.success && <div className="mb-4 p-4 bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-300 text-sm rounded">{flash.success}</div>}
+                                {flash?.error   && <div className="mb-4 p-4 bg-red-500/10 border-l-4 border-red-500 text-red-300 text-sm rounded">{flash.error}</div>}
 
-                        {/* Page Header */}
-                        <div className="flex items-center gap-4 mb-6">
-                            <Link href="/dashboard" className="inline-flex items-center justify-center h-10 w-10 rounded-full border border-white/10 bg-[#031433]/80 hover:bg-[#d4af37]/20 text-[#d4af37] transition shadow-md" title="Kembali">
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                            </Link>
-                            <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                <div>
-                                    <h2 className="text-xl font-extrabold text-white leading-tight">
-                                        Detail Operasi: <span className="text-[#d4af37] font-mono">{operation.operation_number}</span>
-                                    </h2>
-                                    <p className="text-xs text-gray-400 mt-0.5">NCB Interpol Command Center</p>
+                                {/* Page Header */}
+                                <div className="flex items-center gap-4 mb-6">
+                                    <Link href="/dashboard" className="inline-flex items-center justify-center h-10 w-10 rounded-full border border-white/10 bg-[#031433]/80 hover:bg-[#d4af37]/20 text-[#d4af37] transition duration-300 shadow-md gold-glow-hover" title="Kembali">
+                                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                                    </Link>
+                                    <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div>
+                                            <h2 className="text-xl font-extrabold text-white leading-tight">
+                                                Detail Operasi: <span className="text-[#d4af37] font-mono">{operation.operation_number}</span>
+                                            </h2>
+                                            <p className="text-xs text-gray-400 mt-0.5">NCB Interpol Command Center</p>
+                                        </div>
+                                        {(userRole === 'admin' || userRole === 'pimpinan') && (
+                                            <div className="flex gap-3">
+                                                <button className="px-4 py-2 bg-[#d4af37]/10 text-[#d4af37] border border-[#d4af37]/50 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#d4af37]/20 transition shadow-sm" onClick={() => alert('Fitur Ubah Status sedang dikembangkan')}>Ubah Status</button>
+                                                <button className="px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/50 rounded text-xs font-bold uppercase tracking-wider hover:bg-emerald-500/20 transition shadow-sm" onClick={() => alert('Fitur Approve Readiness sedang dikembangkan')}>Approve</button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                                {(userRole === 'admin' || userRole === 'pimpinan') && (
-                                    <div className="flex gap-3">
-                                        <button className="px-4 py-2 bg-[#d4af37]/10 text-[#d4af37] border border-[#d4af37]/50 rounded text-xs font-bold uppercase tracking-wider hover:bg-[#d4af37]/20 transition shadow-sm" onClick={() => alert('Fitur Ubah Status sedang dikembangkan')}>Ubah Status</button>
-                                        <button className="px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/50 rounded text-xs font-bold uppercase tracking-wider hover:bg-emerald-500/20 transition shadow-sm" onClick={() => alert('Fitur Approve Readiness sedang dikembangkan')}>Approve</button>
+
+                                {/* Content Card */}
+                                <div className="overflow-hidden bg-[rgba(10,31,73,0.7)] border border-white/10 shadow-lg sm:rounded-lg p-6 backdrop-blur-md">
+
+                                    {/* Tabs */}
+                                    <div className="border-b border-white/10 mb-6">
+                                        <nav className="-mb-px flex space-x-8 overflow-x-auto">
+                                            {['overview', 'target', 'checklist', 'audit_logs', 'readiness'].map(tab => (
+                                                <button key={tab} onClick={() => setActiveTab(tab)}
+                                                    className={`${activeTab === tab ? 'border-[#d4af37] text-[#d4af37]' : 'border-transparent text-gray-400 hover:text-white hover:border-white/20'} whitespace-nowrap py-4 px-1 border-b-2 font-bold text-xs uppercase tracking-wider transition duration-300`}>
+                                                    {tab.replace('_', ' ')}
+                                                </button>
+                                            ))}
+                                        </nav>
                                     </div>
-                                )}
-                            </div>
-                        </div>
 
-                        {/* Content Card */}
-                        <div className="overflow-hidden bg-[rgba(10,31,73,0.7)] border border-white/10 shadow-lg sm:rounded-lg p-6 backdrop-blur-md">
-
-                            {/* Tabs */}
-                            <div className="border-b border-white/10 mb-6">
-                                <nav className="-mb-px flex space-x-8 overflow-x-auto">
-                                    {['overview', 'target', 'checklist', 'audit_logs', 'readiness'].map(tab => (
-                                        <button key={tab} onClick={() => setActiveTab(tab)}
-                                            className={`${activeTab === tab ? 'border-[#d4af37] text-[#d4af37]' : 'border-transparent text-gray-400 hover:text-white hover:border-white/20'} whitespace-nowrap py-4 px-1 border-b-2 font-bold text-xs uppercase tracking-wider transition`}>
-                                            {tab.replace('_', ' ')}
-                                        </button>
-                                    ))}
-                                </nav>
-                            </div>
-
-                            {/* ── TAB: OVERVIEW ── */}
-                            {activeTab === 'overview' && (
-                                <div className="space-y-8">
-                                    <div>
-                                        <h3 className="text-lg font-bold text-[#d4af37] border-b border-white/10 pb-3 flex items-center gap-2">
-                                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                            Overview
-                                        </h3>
-                                        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-                                            <div className="bg-[#001b3d]/50 p-5 rounded-lg border border-white/5">
-                                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Operation Name</p>
-                                                <p className="font-extrabold text-lg text-white mt-1">{operation.name}</p>
-                                            </div>
-                                            <div className="bg-[#001b3d]/50 p-5 rounded-lg border border-white/5">
-                                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Status</p>
-                                                <div className="mt-1"><span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${getStatusBadgeClass(operation.status)}`}>{operation.status.replace('_', ' ')}</span></div>
-                                            </div>
-                                            <div className="bg-[#001b3d]/50 p-5 rounded-lg border border-white/5">
-                                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Priority</p>
-                                                <div className="mt-1"><span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${getPriorityBadgeClass(operation.priority)}`}>{operation.priority}</span></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-                                        <div className="bg-black/20 border border-white/10 rounded-lg p-5 flex flex-col justify-between">
-                                            <div className="flex justify-between items-start">
-                                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Date Initiated</span>
-                                                <svg className="h-5 w-5 text-[#d4af37]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                            </div>
-                                            <p className="font-extrabold text-base text-white mt-4">{formatDate(operation.created_at)}</p>
-                                        </div>
-                                        <div className="bg-black/20 border border-white/10 rounded-lg p-5 flex flex-col justify-between">
-                                            <div className="flex justify-between items-start">
-                                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Lead Investigator</span>
-                                                <svg className="h-5 w-5 text-[#d4af37]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                                            </div>
-                                            <p className="font-extrabold text-base text-white mt-4">{operation.pic?.name || (operation.pic_id ? `PIC ID: ${operation.pic_id}` : 'PIC ID: -')}</p>
-                                        </div>
-                                        <div className="bg-black/20 border border-white/10 rounded-lg p-5 flex flex-col justify-between">
-                                            <div className="flex justify-between items-start">
-                                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Subjek DPO Terkait</span>
-                                                <svg className="h-5 w-5 text-[#d4af37]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
-                                            </div>
-                                            <p className="font-extrabold text-base text-white mt-4 font-mono truncate">
+                                    {/* Animated Tab Content Container */}
+                                    <div key={activeTab} className="animate-scale-in">
+                                        {/* ── TAB: OVERVIEW ── */}
+                                        {activeTab === 'overview' && (
+                                            <div className="space-y-8">
+                                                <div>
+                                                    <h3 className="text-lg font-bold text-[#d4af37] border-b border-white/10 pb-3 flex items-center gap-2">
+                                                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                        Overview
+                                                    </h3>
+                                                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                                                        <div className="bg-[#001b3d]/50 p-5 rounded-lg border border-white/5 gold-glow-hover">
+                                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Operation Name</p>
+                                                            <p className="font-extrabold text-lg text-white mt-1">{operation.name}</p>
+                                                        </div>
+                                                        <div className="bg-[#001b3d]/50 p-5 rounded-lg border border-white/5 gold-glow-hover">
+                                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Status</p>
+                                                            <div className="mt-1"><span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${getStatusBadgeClass(operation.status)}`}>{operation.status.replace('_', ' ')}</span></div>
+                                                        </div>
+                                                        <div className="bg-[#001b3d]/50 p-5 rounded-lg border border-white/5 gold-glow-hover">
+                                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Priority</p>
+                                                            <div className="mt-1"><span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${getPriorityBadgeClass(operation.priority)}`}>{operation.priority}</span></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+                                                    <div className="bg-black/20 border border-white/10 rounded-lg p-5 flex flex-col justify-between gold-glow-hover">
+                                                        <div className="flex justify-between items-start">
+                                                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Date Initiated</span>
+                                                            <svg className="h-5 w-5 text-[#d4af37]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                        </div>
+                                                        <p className="font-extrabold text-base text-white mt-4">{formatDate(operation.created_at)}</p>
+                                                    </div>
+                                                    <div className="bg-black/20 border border-white/10 rounded-lg p-5 flex flex-col justify-between gold-glow-hover">
+                                                        <div className="flex justify-between items-start">
+                                                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Lead Investigator</span>
+                                                            <svg className="h-5 w-5 text-[#d4af37]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                                        </div>
+                                                        <p className="font-extrabold text-base text-white mt-4">{operation.pic?.name || (operation.pic_id ? `PIC ID: ${operation.pic_id}` : 'PIC ID: -')}</p>
+                                                    </div>
+                                                    <div className="bg-black/20 border border-white/10 rounded-lg p-5 flex flex-col justify-between gold-glow-hover">
+                                                        <div className="flex justify-between items-start">
+                                                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Subjek DPO Terkait</span>
+                                                            <svg className="h-5 w-5 text-[#d4af37]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                                                        </div>
+                                                        <p className="font-extrabold text-base text-white mt-4 font-mono truncate">
                                                 {targetsList.length > 0 ? (
                                                     targetsList.map(t => t.name).join(', ')
                                                 ) : 'Belum ada DPO'}
@@ -318,7 +333,7 @@ export default function OperationDetail({ auth, operation, readiness, auditLogs 
                                     {targetsList.length > 0 ? (
                                         <div className="grid grid-cols-1 gap-4">
                                             {targetsList.map(target => (
-                                                <div key={target.id} className="border border-white/10 p-5 rounded-xl bg-[#001b3d]/50 hover:border-[#d4af37]/40 transition grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-center">
+                                                <div key={target.id} className="border border-white/10 p-5 rounded-xl bg-[#001b3d]/50 hover:border-[#d4af37]/40 transition grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-center gold-glow-hover">
                                                     <div>
                                                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Nama Subjek DPO</p>
                                                         <p className="font-extrabold text-base text-white mt-0.5">{target.name}</p>
@@ -373,13 +388,13 @@ export default function OperationDetail({ auth, operation, readiness, auditLogs 
                                                     const isVerified = item.status === 'Verified';
 
                                                     return (
-                                                        <div key={item.id} className="p-5 hover:bg-white/[0.02] transition">
+                                                        <div key={item.id} className="p-5 hover:bg-white/5 transition duration-200">
                                                             {/* Row 1: Nama + Status selector */}
                                                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                                                 <div className="flex items-center gap-2 flex-wrap">
                                                                     <span className="font-semibold text-white">{item.template_item?.name}</span>
                                                                     {item.template_item?.is_mandatory && <span className="text-red-500 font-bold text-sm" title="Mandatory">*</span>}
-                                                                    {item.template_item?.is_critical && <span className="px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-red-500/10 text-red-400 border border-red-500/20 uppercase">CRITICAL</span>}
+                                                                    {item.template_item?.is_critical && <span className="px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-red-500/10 text-red-400 border border-red-500/20 uppercase animate-pulse">CRITICAL</span>}
                                                                 </div>
                                                                 <div className="flex items-center gap-2">
                                                                     <span className={`px-3 py-1 text-xs rounded-full font-bold uppercase tracking-wider ${
@@ -618,11 +633,11 @@ export default function OperationDetail({ auth, operation, readiness, auditLogs 
                                         )}
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                                        <div className="bg-[#001b3d]/50 border border-white/10 rounded-lg p-5 shadow-sm flex flex-col items-center justify-center">
+                                        <div className="bg-[#001b3d]/50 border border-white/10 rounded-lg p-5 shadow-sm flex flex-col items-center justify-center gold-glow-hover">
                                             <span className="text-sm text-gray-400 font-medium">Weighted Score</span>
                                             <span className="text-4xl font-extrabold text-[#d4af37] mt-2">{readiness.score}%</span>
                                         </div>
-                                        <div className="bg-[#001b3d]/50 border border-white/10 rounded-lg p-5 shadow-sm flex flex-col items-center justify-center">
+                                        <div className="bg-[#001b3d]/50 border border-white/10 rounded-lg p-5 shadow-sm flex flex-col items-center justify-center gold-glow-hover">
                                             <span className="text-sm text-gray-400 font-medium">Status Kesiapan</span>
                                             <span className={`inline-flex items-center px-3 py-1 mt-3 rounded-full text-xs font-bold uppercase tracking-wider ${
                                                 readiness.status === 'READY'                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
@@ -631,12 +646,12 @@ export default function OperationDetail({ auth, operation, readiness, auditLogs 
                                                 'bg-red-500/10 text-red-400 border border-red-500/20'
                                             }`}>{readiness.status.replace('_', ' ')}</span>
                                         </div>
-                                        <div className="bg-[#001b3d]/50 border border-white/10 rounded-lg p-5 shadow-sm flex flex-col items-center justify-center">
+                                        <div className="bg-[#001b3d]/50 border border-white/10 rounded-lg p-5 shadow-sm flex flex-col items-center justify-center gold-glow-hover">
                                             <span className="text-sm text-gray-400 font-medium">Akumulasi Bobot</span>
                                             <span className="text-2xl font-bold text-white mt-2">{readiness.completed_weight} / {readiness.total_weight}</span>
                                             <span className="text-xs text-gray-500 mt-1">total bobot diselesaikan</span>
                                         </div>
-                                        <div className="bg-[#001b3d]/50 border border-white/10 rounded-lg p-5 shadow-sm flex flex-col items-center justify-center">
+                                        <div className="bg-[#001b3d]/50 border border-white/10 rounded-lg p-5 shadow-sm flex flex-col items-center justify-center gold-glow-hover">
                                             <span className="text-sm text-gray-400 font-medium">Progress Mandatory</span>
                                             <span className="text-2xl font-bold text-white mt-2">{readiness.completed_mandatory} / {readiness.total_mandatory}</span>
                                             <span className="text-xs text-gray-500 mt-1">item diselesaikan</span>
@@ -644,7 +659,7 @@ export default function OperationDetail({ auth, operation, readiness, auditLogs 
                                     </div>
                                     <div className="p-4 bg-blue-500/10 border-l-4 border-blue-500 text-blue-300 rounded-r-md text-sm font-medium">{readiness.message}</div>
                                     {readiness.history && readiness.history.length > 0 && (
-                                        <div className="border border-white/10 rounded-lg p-5 shadow-sm bg-[#001b3d]/50">
+                                        <div className="border border-white/10 rounded-lg p-5 shadow-sm bg-[#001b3d]/50 gold-glow-hover">
                                             <h4 className="font-bold text-[#d4af37] mb-4 flex items-center gap-2">
                                                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
                                                 Riwayat Snapshot Skor Kesiapan (Timeline)
@@ -660,9 +675,12 @@ export default function OperationDetail({ auth, operation, readiness, auditLogs 
                                             </div>
                                         </div>
                                     )}
-                                    <div className="border border-white/10 rounded-lg p-5 shadow-sm bg-[#001b3d]/50">
+                                    <div className="border border-white/10 rounded-lg p-5 shadow-sm bg-[#001b3d]/50 gold-glow-hover">
                                         <h4 className="font-bold text-white mb-3 flex items-center gap-2">
-                                            <span className="h-2 w-2 rounded-full bg-red-500"></span>
+                                            <span className="relative flex h-2 w-2">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                            </span>
                                             Critical Blockers ({readiness.uncompleted_critical_blockers.length})
                                         </h4>
                                         {readiness.has_uncompleted_critical_blockers ? (
@@ -698,7 +716,10 @@ export default function OperationDetail({ auth, operation, readiness, auditLogs 
                                 </div>
                             )}
 
-                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </main>
                 </div>
             </div>

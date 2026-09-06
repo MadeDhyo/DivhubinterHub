@@ -1,12 +1,23 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import CardSkeleton from '@/Components/Skeleton/CardSkeleton';
+import TableSkeleton from '@/Components/Skeleton/TableSkeleton';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Dashboard({ auth, operations = [], averageReadinessScore = 0, dpoPersons = [], users = [] }) {
     const { flash } = usePage().props;
     const [searchQuery, setSearchQuery] = useState('');
     const [dpoSearchQuery, setDpoSearchQuery] = useState('');
     const [showCreateOperationModal, setShowCreateOperationModal] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Simulate initial loading to showcase skeleton animation
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, []);
 
     const isAdmin = auth?.user?.role?.toLowerCase() === 'admin';
 
@@ -65,7 +76,7 @@ export default function Dashboard({ auth, operations = [], averageReadinessScore
         <AuthenticatedLayout>
             <Head title="Pusat Komando Operasional" />
 
-            <div className="space-y-8">
+            <div className="space-y-8 animate-fade-in-up">
                 {/* Flash Messages */}
                 {flash?.success && (
                     <div className="p-4 bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-300 rounded-r-md text-sm font-semibold">
@@ -74,150 +85,163 @@ export default function Dashboard({ auth, operations = [], averageReadinessScore
                 )}
 
                 {/* SUMMARY CARDS */}
-                <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
-                    {/* Card 1: Kasus Aktif */}
-                    <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-[#d4af37]/60 transition group relative overflow-hidden animate-stagger-1 hover:-translate-y-1 duration-300">
-                        <div className="absolute top-0 right-0 h-16 w-16 bg-[#d4af37]/5 rounded-bl-full flex items-center justify-center group-hover:bg-[#d4af37]/10 transition" />
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Kasus Aktif</span>
-                            <svg className="h-6 w-6 text-[#d4af37] opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
+                {isLoading ? (
+                    <CardSkeleton count={4} />
+                ) : (
+                    <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
+                        {/* Card 1: Kasus Aktif */}
+                        <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 gold-glow-hover relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 h-16 w-16 bg-[#d4af37]/5 rounded-bl-full flex items-center justify-center group-hover:bg-[#d4af37]/15 transition duration-300" />
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Kasus Aktif</span>
+                                <svg className="h-6 w-6 text-[#d4af37] opacity-80 group-hover:scale-110 transition duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <p className="text-3xl font-extrabold mt-3 text-white tracking-tight">{activeOperationsCount}</p>
+                            <p className="text-[10px] text-gray-400 mt-2">Kasus dalam penanganan aktif</p>
                         </div>
-                        <p className="text-3xl font-extrabold mt-3 text-white">{activeOperationsCount}</p>
-                        <p className="text-[10px] text-gray-400 mt-2">Kasus dalam penanganan aktif</p>
-                    </div>
 
-                    {/* Card 2: Red Notices */}
-                    <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-red-500/60 transition group relative overflow-hidden animate-stagger-2 hover:-translate-y-1 duration-300">
-                        <div className="absolute top-0 right-0 h-16 w-16 bg-red-500/5 rounded-bl-full flex items-center justify-center group-hover:bg-red-500/10 transition" />
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Red Notices</span>
-                            <svg className="h-6 w-6 text-red-500 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
+                        {/* Card 2: Red Notices */}
+                        <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 gold-glow-hover relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 h-16 w-16 bg-red-500/5 rounded-bl-full flex items-center justify-center group-hover:bg-red-500/15 transition duration-300" />
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Red Notices</span>
+                                <svg className="h-6 w-6 text-red-500 opacity-80 group-hover:scale-110 transition duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <p className="text-3xl font-extrabold mt-3 text-white tracking-tight">--</p>
+                            <p className="text-[10px] text-gray-500 mt-2">Statistik backend belum terhubung</p>
                         </div>
-                        <p className="text-3xl font-extrabold mt-3 text-white">--</p>
-                        <p className="text-[10px] text-gray-500 mt-2">Statistik backend belum terhubung</p>
-                    </div>
 
-                    {/* Card 3: Menunggu Persetujuan */}
-                    <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-yellow-500/60 transition group relative overflow-hidden animate-stagger-3 hover:-translate-y-1 duration-300">
-                        <div className="absolute top-0 right-0 h-16 w-16 bg-yellow-500/5 rounded-bl-full flex items-center justify-center group-hover:bg-yellow-500/10 transition" />
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Menunggu Persetujuan</span>
-                            <svg className="h-6 w-6 text-yellow-500 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                        {/* Card 3: Menunggu Persetujuan */}
+                        <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 gold-glow-hover relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 h-16 w-16 bg-yellow-500/5 rounded-bl-full flex items-center justify-center group-hover:bg-yellow-500/15 transition duration-300" />
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Menunggu Persetujuan</span>
+                                <svg className="h-6 w-6 text-yellow-500 opacity-80 group-hover:scale-110 transition duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <p className="text-3xl font-extrabold mt-3 text-white tracking-tight">--</p>
+                            <p className="text-[10px] text-gray-500 mt-2">Data persetujuan belum dikonfigurasi</p>
                         </div>
-                        <p className="text-3xl font-extrabold mt-3 text-white">--</p>
-                        <p className="text-[10px] text-gray-500 mt-2">Data persetujuan belum dikonfigurasi</p>
-                    </div>
 
-                    {/* Card 4: Skor Kesiapan (Real Aggregate) */}
-                    <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 hover:border-emerald-500/60 transition group relative overflow-hidden animate-stagger-4 hover:-translate-y-1 duration-300">
-                        <div className="absolute top-0 right-0 h-16 w-16 bg-emerald-500/5 rounded-bl-full flex items-center justify-center group-hover:bg-emerald-500/10 transition" />
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Skor Kesiapan</span>
-                            <svg className="h-6 w-6 text-emerald-500 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                        {/* Card 4: Skor Kesiapan (Real Aggregate) */}
+                        <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 gold-glow-hover relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 h-16 w-16 bg-emerald-500/5 rounded-bl-full flex items-center justify-center group-hover:bg-emerald-500/15 transition duration-300" />
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Skor Kesiapan</span>
+                                <svg className="h-6 w-6 text-emerald-500 opacity-80 group-hover:scale-110 transition duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <p className="text-3xl font-extrabold mt-3 text-white tracking-tight">{averageReadinessScore}%</p>
+                            <p className="text-[10px] text-emerald-400 mt-2 font-semibold">Rata-rata skor kesiapan operasi aktif</p>
                         </div>
-                        <p className="text-3xl font-extrabold mt-3 text-white">{averageReadinessScore}%</p>
-                        <p className="text-[10px] text-emerald-400 mt-2 font-semibold">Rata-rata skor kesiapan operasi aktif</p>
-                    </div>
-                </section>
+                    </section>
+                )}
 
                 {/* TABLE & RISK REGIONAL SIDEBAR GRID */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* LEFT TABLE: Operasi Prioritas Tinggi */}
-                    <div className="lg:col-span-2 bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 animate-fade-in-up">
-                        <div className="flex items-center justify-between mb-6">
-                            <div>
-                                <h3 className="text-lg font-bold text-white">Operasi Prioritas Tinggi</h3>
-                                <p className="text-xs text-gray-400">Daftar kasus operasi aktif OCMS</p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                {isAdmin && (
-                                    <button
-                                        onClick={() => setShowCreateOperationModal(true)}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#d4af37] hover:bg-[#b5952f] text-[#001b3d] font-bold text-xs uppercase tracking-wider rounded-lg shadow-md hover:brightness-110 transition cursor-pointer"
-                                    >
-                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" /></svg>
-                                        Tambah Operasi
-                                    </button>
-                                )}
-                                <button
-                                    onClick={() => alert('Fitur Lihat Semua Kasus segera tersedia.')}
-                                    className="text-xs text-[#d4af37] hover:underline font-semibold"
-                                >
-                                    Lihat Semua
-                                </button>
-                            </div>
+                    {isLoading ? (
+                        <div className="lg:col-span-2">
+                            <TableSkeleton rows={4} />
                         </div>
+                    ) : (
+                        <div className="lg:col-span-2 bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 transition duration-300">
+                            <div className="flex items-center justify-between mb-6">
+                                <div>
+                                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                        <span className="h-2 w-2 rounded-full bg-[#d4af37] animate-ping" />
+                                        Operasi Prioritas Tinggi
+                                    </h3>
+                                    <p className="text-xs text-gray-400">Daftar kasus operasi aktif OCMS</p>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    {isAdmin && (
+                                        <button
+                                            onClick={() => setShowCreateOperationModal(true)}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#d4af37] hover:bg-[#b5952f] text-[#001b3d] font-bold text-xs uppercase tracking-wider rounded-lg shadow-md hover:brightness-110 transition cursor-pointer"
+                                        >
+                                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" /></svg>
+                                            Tambah Operasi
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => alert('Fitur Lihat Semua Kasus segera tersedia.')}
+                                        className="text-xs text-[#d4af37] hover:text-yellow-400 font-semibold transition"
+                                    >
+                                        Lihat Semua
+                                    </button>
+                                </div>
+                            </div>
 
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm text-gray-300">
-                                <thead className="text-[11px] text-gray-400 uppercase tracking-wider border-b border-white/10">
-                                    <tr>
-                                        <th className="py-3 px-4">ID Referensi</th>
-                                        <th className="py-3 px-4">Nama Operasi</th>
-                                        <th className="py-3 px-4">Tipe</th>
-                                        <th className="py-3 px-4 text-center">Status</th>
-                                        <th className="py-3 px-4 text-right">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-white/5">
-                                    {filteredOperations.length > 0 ? (
-                                        filteredOperations.map(op => (
-                                            <tr key={op.id} className="hover:bg-white/5 transition">
-                                                <td className="py-4 px-4 font-mono text-xs font-semibold text-[#d4af37]">{op.operation_number}</td>
-                                                <td className="py-4 px-4 font-semibold text-white">{op.name}</td>
-                                                <td className="py-4 px-4 text-xs text-gray-400">
-                                                    {op.targets && op.targets.length > 0
-                                                        ? `${op.targets[0].nationality || 'Transnational'} Subject`
-                                                        : 'Transnational Crime'}
-                                                </td>
-                                                <td className="py-4 px-4 text-center">
-                                                    <span className={`inline-flex px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                                                        op.status === 'READY' || op.status === 'Completed'
-                                                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                                            : op.status === 'PARTIALLY_READY' || op.status === 'Verification'
-                                                            ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
-                                                            : op.status === 'PENDING_CONFIGURATION'
-                                                            ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                                                            : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                                                    }`}>
-                                                        {op.status}
-                                                    </span>
-                                                </td>
-                                                <td className="py-4 px-4 text-right">
-                                                    <Link
-                                                        href={`/operations/${op.id}`}
-                                                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#d4af37]/10 hover:bg-[#d4af37]/20 text-[#d4af37] text-xs font-semibold tracking-wide transition"
-                                                    >
-                                                        Detail
-                                                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                                                        </svg>
-                                                    </Link>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-sm text-gray-300">
+                                    <thead className="text-[11px] text-gray-400 uppercase tracking-wider border-b border-white/10">
+                                        <tr>
+                                            <th className="py-3 px-4">ID Referensi</th>
+                                            <th className="py-3 px-4">Nama Operasi</th>
+                                            <th className="py-3 px-4">Tipe</th>
+                                            <th className="py-3 px-4 text-center">Status</th>
+                                            <th className="py-3 px-4 text-right">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/5">
+                                        {filteredOperations.length > 0 ? (
+                                            filteredOperations.map(op => (
+                                                <tr key={op.id} className="hover:bg-white/5 transition duration-200 group">
+                                                    <td className="py-4 px-4 font-mono text-xs font-bold text-[#d4af37] group-hover:text-yellow-400 transition">{op.operation_number}</td>
+                                                    <td className="py-4 px-4 font-semibold text-white">{op.name}</td>
+                                                    <td className="py-4 px-4 text-xs text-gray-400">
+                                                        {op.targets && op.targets.length > 0
+                                                            ? `${op.targets[0].nationality || 'Transnational'} Subject`
+                                                            : 'Transnational Crime'}
+                                                    </td>
+                                                    <td className="py-4 px-4 text-center">
+                                                        <span className={`inline-flex px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                                                            op.status === 'READY' || op.status === 'Completed'
+                                                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                                                : op.status === 'PARTIALLY_READY' || op.status === 'Verification'
+                                                                ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+                                                                : op.status === 'PENDING_CONFIGURATION'
+                                                                ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                                                                : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                                                        }`}>
+                                                            {op.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-4 px-4 text-right">
+                                                        <Link
+                                                            href={`/operations/${op.id}`}
+                                                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-[#d4af37]/10 hover:bg-[#d4af37]/20 text-[#d4af37] hover:text-yellow-300 text-xs font-semibold tracking-wide transition duration-300 border border-[#d4af37]/30 hover:border-[#d4af37]"
+                                                        >
+                                                            Detail
+                                                            <svg className="h-3 w-3 group-hover:translate-x-1 transition duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                                            </svg>
+                                                        </Link>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="5" className="py-8 text-center text-gray-500 text-sm">
+                                                    Tidak ada data operasi aktif yang ditemukan.
                                                 </td>
                                             </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td colSpan="5" className="py-8 text-center text-gray-500 text-sm">
-                                                Tidak ada data operasi aktif yang ditemukan.
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* RIGHT SIDEBAR: Penilaian Risiko Regional */}
-                    <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 flex flex-col justify-between">
+                    <div className="bg-[#031433]/65 backdrop-blur-md border border-white/10 rounded-xl p-6 flex flex-col justify-between gold-glow-hover">
                         <div>
                             <h3 className="text-lg font-bold text-white mb-2">Penilaian Risiko Regional</h3>
                             <p className="text-xs text-gray-500 mb-6">Peta kerentanan ancaman nasional berdasarkan statistik intelijen terbaru.</p>
@@ -235,7 +259,7 @@ export default function Dashboard({ auth, operations = [], averageReadinessScore
                                             <span className="font-bold text-gray-400">{risk.level} ({risk.score}%)</span>
                                         </div>
                                         <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                                            <div className={`h-full ${risk.color} rounded-full`} style={{ width: `${risk.score}%` }} />
+                                            <div className={`h-full ${risk.color} rounded-full transition-all duration-1000 ease-out`} style={{ width: `${risk.score}%` }} />
                                         </div>
                                     </div>
                                 ))}

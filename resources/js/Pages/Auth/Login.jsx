@@ -99,6 +99,14 @@ export default function Login({ status, canResetPassword }) {
                     </div>
                 )}
 
+                {/* Error alert */}
+                {hasErrors && !loginSuccess && (
+                    <div className="mb-5 px-3.5 py-2.5 rounded-lg bg-red-500/8 border border-red-500/20 text-xs font-semibold text-red-400/90 animate-slide-down flex items-center gap-2.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-red-400 shrink-0 animate-pulse" />
+                        {Array.isArray(errors.email) ? errors.email[0] : (typeof errors.email === 'string' ? errors.email : 'Otentikasi gagal. Periksa kembali email & password Anda.')}
+                    </div>
+                )}
+
                 <form onSubmit={submit} className="space-y-5">
                     {/* EMAIL */}
                     <div className="animate-stagger-1">
